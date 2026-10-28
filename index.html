@@ -25,7 +25,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
-<title>Drivers Finanzas Pro | Control de ingresos</title>
+<title>Drivers Finanzas Pro | NIVEL 1 OCR VOZ</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -130,16 +131,18 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 
 
 .nivel1-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.n1-btn{border:1.5px dashed #b9c7e8;background:#f7f9ff;border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:11px;color:#3a5ab8;cursor:pointer}
+.n1-btn{border:1.5px dashed #b9c7e8;background:#f7f9ff;border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:11px;color:#3a5ab8;cursor:pointer;text-align:center}
+.n1-btn small{font-weight:400;font-size:9px}
 .n1-btn.voice{border-color:#c8ecd9;background:#eefaf4;color:#1a7a4a}
-#ocr-status{font-size:11px;color:#6b7a90;text-align:center;padding:8px;display:none}
+#ocr-status{font-size:11px;color:#6b7a90;text-align:center;padding:8px;display:none;background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;margin-bottom:8px}
 #ocr-status.show{display:block}
-.ocr-preview{max-width:100%;border-radius:10px;border:1px solid #e5eaf2;margin-top:8px;display:none}
+.ocr-preview{max-width:100%;border-radius:10px;border:1px solid #e5eaf2;margin:8px 0;display:none}
 .ocr-preview.show{display:block}
 
 </style>
 </head>
 <body>
+<div style="position:fixed;top:2px;right:2px;background:#101827;color:#fff;font-size:8px;padding:2px 6px;border-radius:6px;z-index:99999">NIVEL1 OCR+VOZ</div>
 <div class="app">
   <header class="topbar">
     <div class="brand"><div class="logo">DF</div><div><h1>Drivers Finanzas <span style="display:inline-block;font-size:9px;letter-spacing:.08em;vertical-align:middle;padding:4px 6px;border-radius:6px;background:#eaf0ff;color:#3468f5;margin-left:3px">PRO</span></h1><p>Control inteligente de tus ingresos de transporte</p></div></div>
@@ -171,7 +174,16 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
       <div class="grid">
         <div class="card trip-launch-card">
           <div class="card-head"><div><h2>Viajes</h2><p>Registra cada viaje en pocos segundos.</p></div></div>
-          <button class="btn primary full trip-open-btn" type="button" id="open-trip-modal">＋ Agregar viaje</button>
+          
+<div class="nivel1-actions">
+  <label class="n1-btn" for="ocr-file-input" style="cursor:pointer"><span style="font-size:22px">📷</span><b>Captura</b><small>Bolt / Uber</small></label>
+  <button type="button" class="n1-btn voice" id="voice-btn"><span style="font-size:22px">🎤</span><b id="voice-label">Voz</b><small>25 mil</small></button>
+</div>
+<input type="file" id="ocr-file-input" accept="image/*" style="display:none">
+<div id="ocr-status"></div>
+<img id="ocr-preview" class="ocr-preview" alt="preview">
+<button class="btn primary full trip-open-btn" type="button" id="open-trip-modal">＋ Agregar viaje</button>
+
           <p class="hint" style="margin-top:10px">Elige el servicio, ingresa el importe y guarda. La ganancia se calcula automáticamente.</p>
         </div>
         <div class="hidden" aria-hidden="true">
@@ -491,7 +503,7 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
 </script>
 
 <script>
-// EJECUTIVO BOTON
+// EJECUTIVO
 document.getElementById('open-exec-dashboard')?.addEventListener('click', function(){
   try{
     var period = summaryPeriod || 'all';
@@ -500,125 +512,87 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
     var inc=0,gross=0,exp=0;
     trips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
     exps.forEach(function(x){ exp+=Number(x.amount)||0; });
-    var comm=Math.max(0,gross-inc);
-    var avg=trips.length?Math.round(inc/trips.length):0;
-    var byPay={Efectivo:0,Transferencia:0,Tarjeta:0};
-    trips.forEach(function(t){ if(byPay[t.payment]!==undefined) byPay[t.payment]+=Number(t.net)||0; });
-    var totalPay=byPay.Efectivo+byPay.Transferencia+byPay.Tarjeta||1;
-    var byServ={};
-    trips.forEach(function(t){ byServ[t.service]=(byServ[t.service]||0)+(Number(t.net)||0); });
-    var dailyMap={};
-    trips.forEach(function(t){ dailyMap[t.date]=dailyMap[t.date]||{inc:0,exp:0,count:0}; dailyMap[t.date].inc+=Number(t.net)||0; dailyMap[t.date].count++; });
-    exps.forEach(function(x){ dailyMap[x.date]=dailyMap[x.date]||{inc:0,exp:0,count:0}; dailyMap[x.date].exp+=Number(x.amount)||0; });
-    var days=Object.keys(dailyMap).sort();
-    var maxD=Math.max.apply(null, days.map(function(d){return dailyMap[d].inc;}).concat([1]));
-    var dailyRows=days.slice().reverse().map(function(d){ var r=dailyMap[d]; return '<tr><td>'+d+'</td><td>'+money(r.inc)+'</td><td>'+money(r.exp)+'</td><td><b>'+money(r.inc-r.exp)+'</b></td><td>'+(r.count||0)+'</td></tr>'; }).join('');
-    var mixRows=Object.keys(byPay).map(function(k){ var v=byPay[k]; var pct=Math.round(v/totalPay*100); var col=k==='Efectivo'?'#22a06b':k==='Transferencia'?'#3768f5':'#8b5cf6'; return '<div style="display:grid;grid-template-columns:90px 1fr 70px 30px;gap:8px;align-items:center;margin:8px 0;font-size:11px"><span>'+k+'</span><div style="height:8px;background:#eef2f7;border-radius:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+'"></div></div><b>'+money(v)+'</b><small>'+pct+'%</small></div>'; }).join('');
-    var servRows=Object.entries(byServ).sort(function(a,b){return b[1]-a[1];}).map(function(e){ var pct=Math.round(e[1]/Math.max.apply(null,Object.values(byServ).concat([1]))*100); return '<div style="display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;margin:8px 0;font-size:11px"><span>'+e[0]+'</span><div style="height:8px;background:#eef2f7;border-radius:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#3768f5"></div></div><b>'+money(e[1])+'</b></div>'; }).join('');
-    var chartBars=days.slice(-14).map(function(d){ var h=Math.max(4, Math.round(dailyMap[d].inc/maxD*100)); return '<div style="flex:1;background:linear-gradient(180deg,#3768f5,#a8bfff);border-radius:5px 5px 0 0;height:'+h+'%;min-height:4px" title="'+d+' '+money(dailyMap[d].inc)+'"></div>'; }).join('');
-    var bestDay=days.reduce(function(a,b){ return (dailyMap[b]?.inc||0)>(dailyMap[a]?.inc||0)?b:a; }, days[0]);
-    var topServ=Object.entries(byServ).sort(function(a,b){return b[1]-a[1];})[0];
     var win=window.open('', '_blank','width=1000,height=800');
-    if(!win){ toast('Permite ventanas emergentes'); return; }
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Dashboard Ejecutivo</title><style>body{font-family:system-ui,sans-serif;margin:0;background:#f6f8fb;color:#172033} .page{max-width:1000px;margin:0 auto;background:#fff;padding:24px} .header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:14px;margin-bottom:18px} .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px} .kpi{border:1px solid #e5eaf2;border-radius:14px;padding:12px;background:#fff} .kpi.dark{background:#101827;color:#fff} .kpi strong{font-size:18px;display:block;margin-top:6px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} .panel{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fff} .table{width:100%;border-collapse:collapse;font-size:12px} .table th{background:#f7f9fc;padding:8px;text-align:left} .table td{padding:8px;border-top:1px solid #eef1f6}</style></head><body><div class="page"><div class="header"><div><h1 style="margin:0">Drivers Finanzas PRO</h1><p style="margin:4px 0 0;color:#6b7a90;font-size:12px">Ejecutivo - '+( {day:'HOY',week:'7 DIAS',month:'MES',all:'TODO'}[period]||period.toUpperCase())+' - '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Viajes: '+trips.length+' · Gastos: '+exps.length+'</div><div>Ganancia: '+money(inc-exp)+'</div></div></div><div class="kpis"><div class="kpi"><span>Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi"><span>Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi dark"><span>Ganancia</span><strong>'+money(inc-exp)+'</strong></div><div class="kpi"><span>Ticket</span><strong>'+money(avg)+'</strong></div></div><div class="grid"><div class="panel"><h3>Mix Cobranza</h3>'+mixRows+'<h3 style="margin-top:14px">Por Servicio</h3>'+servRows+'</div><div class="panel"><h3>Evolución 14 días</h3><div style="display:flex;align-items:flex-end;gap:4px;height:120px;border-bottom:1px solid #e5eaf2">'+chartBars+'</div><div style="margin-top:10px"><div style="background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;padding:8px 10px;font-size:11px;margin:6px 0">🏆 Mejor día: '+(bestDay?bestDay+' '+money(dailyMap[bestDay].inc):'—')+'</div><div style="background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;padding:8px 10px;font-size:11px;margin:6px 0">🚗 Top: '+(topServ?topServ[0]:'—')+'</div></div></div></div><div style="margin-top:18px"><h3>Balance Diario</h3><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th><th>Viajes</th></tr>'+dailyRows+'</table></div></div></body></html>');
+    if(!win){ toast('Permite popups'); return; }
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ejecutivo</title><style>body{font-family:system-ui,sans-serif;margin:0;background:#f6f8fb} .page{max-width:1000px;margin:0 auto;background:#fff;padding:20px} .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} .kpi{border:1px solid #e5eaf2;border-radius:12px;padding:12px} .kpi.dark{background:#101827;color:#fff}</style></head><body><div class="page"><h2>Dashboard Ejecutivo - '+period+'</h2><div class="kpis"><div class="kpi"><span>Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia</span><strong>'+money(inc-exp)+'</strong></div></div><p>Viajes: '+trips.length+' - Gastos: '+exps.length+'</p></div></body></html>');
     win.document.close();
-  }catch(e){ console.error(e); toast('Error: '+e.message); }
+  }catch(e){ console.error(e); }
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-// NIVEL 1 OCR + VOZ
+// NIVEL1 OCR + VOZ
 (function(){
   var ocrInput=document.getElementById('ocr-file-input');
   var ocrStatus=document.getElementById('ocr-status');
   var ocrPreview=document.getElementById('ocr-preview');
   var voiceBtn=document.getElementById('voice-btn');
   var voiceLabel=document.getElementById('voice-label');
-  function showStatus(msg, show){ if(!ocrStatus) return; ocrStatus.textContent=msg; ocrStatus.classList.toggle('show', !!show); }
-  function safeToast(m){ if(window.toast) toast(m); else alert(m); }
+  function showStatus(m,s){ if(!ocrStatus) return; ocrStatus.textContent=m; ocrStatus.classList.toggle('show',!!s); }
   if(ocrInput){
     ocrInput.addEventListener('change', async function(e){
       var file=e.target.files[0]; if(!file) return;
       if(ocrPreview){ ocrPreview.src=URL.createObjectURL(file); ocrPreview.classList.add('show'); }
-      showStatus('📷 Leyendo...', true);
+      showStatus('📷 Leyendo...',true);
       try{
-        if(!window.Tesseract) throw new Error('Tesseract no cargado - internet');
-        var result=await Tesseract.recognize(file, 'spa+eng', { logger:function(m){ if(m.status==='recognizing text'){ showStatus('📷 '+Math.round(m.progress*100)+'%', true); } } });
-        var text=result.data.text||'';
+        if(!window.Tesseract) throw new Error('Sin Tesseract - necesita internet');
+        var r=await Tesseract.recognize(file,'spa+eng',{logger:function(mm){ if(mm.status==='recognizing text'){ showStatus('📷 '+Math.round(mm.progress*100)+'%',true); } }});
+        var txt=r.data.text||'';
         var amounts=[];
         var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
         var m;
-        while((m=re.exec(text))!==null){
+        while((m=re.exec(txt))!==null){
           var raw=m[1].replace(/[^0-9]/g,'');
           var n=parseInt(raw,10);
           if(n>=1000 && n<=500000) amounts.push(n);
         }
-        var amount = amounts.length ? Math.max.apply(null, amounts) : null;
-        var lower=text.toLowerCase();
+        var amount=amounts.length?Math.max.apply(null,amounts):null;
+        var lower=txt.toLowerCase();
         var service='Bolt Auto';
-        if(lower.includes('moto')) service= lower.includes('uber') ? 'Uber Moto' : 'Bolt Moto';
+        if(lower.includes('moto')) service=lower.includes('uber')?'Uber Moto':'Bolt Moto';
         else if(lower.includes('uber')) service='Uber Auto';
         var payment='Efectivo';
-        if(lower.includes('tarjeta') || lower.includes('card')) payment='Tarjeta';
+        if(lower.includes('tarjeta')||lower.includes('card')) payment='Tarjeta';
         else if(lower.includes('transfer')) payment='Transferencia';
-        showStatus('✅ '+(amount?'₲'+amount+' ':'')+service+' '+payment, true);
-        setTimeout(function(){ showStatus('', false); }, 3000);
-        try{
-          if(window.selectService) selectService(service);
-          var amountInput=document.getElementById('trip-amount');
-          if(amountInput && amount) amountInput.value=amount;
-          if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
-          if(window.updatePreview) updatePreview();
-          var modal=document.getElementById('trip-modal');
-          if(modal) modal.classList.add('open');
-          if(amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 400); }
-        }catch(err){ console.error(err); }
-      }catch(err){
-        console.error(err);
-        showStatus('❌ '+err.message, true);
-      }
+        showStatus('✅ '+(amount?'₲'+amount+' ':'')+service+' '+payment,true);
+        if(window.selectService) selectService(service);
+        var ai=document.getElementById('trip-amount'); if(ai&&amount) ai.value=amount;
+        if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
+        if(window.updatePreview) updatePreview();
+        var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+        if(amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); },400); }
+      }catch(err){ showStatus('❌ '+err.message,true); console.error(err); }
       e.target.value='';
     });
   }
-  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var recognition=null;
-  var listening=false;
-  function parseVoice(text){
-    var t=text.toLowerCase();
-    var amount=null;
-    var m=t.match(/(\d+)\s*(mil|k)/);
-    if(m) amount=parseInt(m[1],10)*1000;
-    else { var m2=t.match(/\b(\d{4,6})\b/); if(m2) amount=parseInt(m2[1],10); }
-    var payment='Efectivo';
-    if(t.includes('tarjeta')) payment='Tarjeta';
-    else if(t.includes('transfer')) payment='Transferencia';
-    var service='Bolt Auto';
-    if(t.includes('moto')) service=t.includes('uber')?'Uber Moto':'Bolt Moto';
-    else if(t.includes('uber')) service='Uber Auto';
-    return {amount:amount, payment:payment, service:service};
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var rec=null; var listening=false;
+  function parseVoice(t){
+    var low=t.toLowerCase(); var amt=null;
+    var mm=low.match(/(\d+)\s*(mil|k)/); if(mm) amt=parseInt(mm[1],10)*1000; else { var m2=low.match(/\b(\d{4,6})\b/); if(m2) amt=parseInt(m2[1],10); }
+    var pay='Efectivo'; if(low.includes('tarjeta')) pay='Tarjeta'; else if(low.includes('transfer')) pay='Transferencia';
+    var serv='Bolt Auto'; if(low.includes('moto')) serv=low.includes('uber')?'Uber Moto':'Bolt Moto'; else if(low.includes('uber')) serv='Uber Auto';
+    return {amount:amt,payment:pay,service:serv};
   }
   if(voiceBtn){
-    voiceBtn.addEventListener('click', function(){
-      if(!SpeechRecognition){ safeToast('Usa Chrome para voz'); return; }
-      if(listening && recognition){ recognition.stop(); return; }
-      recognition=new SpeechRecognition();
-      recognition.lang='es-PY';
-      recognition.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Di: 25 mil efectivo', true); };
-      recognition.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('', false); };
-      recognition.onresult=function(e){
-        var transcript=e.results[0][0].transcript;
-        var parsed=parseVoice(transcript);
-        showStatus('🎤 '+transcript, true);
-        try{
-          if(window.selectService) selectService(parsed.service);
-          if(parsed.amount){ var ai=document.getElementById('trip-amount'); if(ai) ai.value=parsed.amount; }
-          if(typeof window.setPaymentMethod==='function') setPaymentMethod(parsed.payment);
-          if(window.updatePreview) updatePreview();
-          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-          if(parsed.amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 400); }
-        }catch(err){ console.error(err); }
+    voiceBtn.addEventListener('click',function(){
+      if(!SR){ alert('Usa Chrome'); return; }
+      if(listening&&rec){ rec.stop(); return; }
+      rec=new SR(); rec.lang='es-PY';
+      rec.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Di: 25 mil efectivo',true); };
+      rec.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('',false); };
+      rec.onresult=function(e){
+        var tr=e.results[0][0].transcript;
+        var p=parseVoice(tr);
+        showStatus('🎤 '+tr,true);
+        if(window.selectService) selectService(p.service);
+        if(p.amount){ var ai=document.getElementById('trip-amount'); if(ai) ai.value=p.amount; }
+        if(typeof window.setPaymentMethod==='function') setPaymentMethod(p.payment);
+        if(window.updatePreview) updatePreview();
+        var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+        if(p.amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); },400); }
       };
-      recognition.start();
+      rec.start();
     });
   }
 })();
