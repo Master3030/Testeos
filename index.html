@@ -25,8 +25,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
-<title>Drivers Finanzas Pro | NIVEL1 FIX</title>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Drivers Finanzas Pro | PRACTICO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -136,16 +135,17 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 .n1-btn.voice{border-color:#c8ecd9;background:#eefaf4;color:#1a7a4a}
 body.dark .n1-btn{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
 body.dark .n1-btn.voice{background:#1a2e26;border-color:#2d5a42;color:#7dd8a8}
-#ocr-status{font-size:11px;text-align:center;padding:8px;display:none;background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;margin-bottom:8px}
+#ocr-status{font-size:12px;text-align:center;padding:10px;display:none;background:#eef2ff;border:1px solid #cdd9f0;border-radius:10px;margin-bottom:8px;font-weight:600}
 #ocr-status.show{display:block}
-body.dark #ocr-status{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
+#ocr-status.error{background:#fde8e8;border-color:#f5a6a6;color:#a33}
+#ocr-status.ok{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+body.dark #ocr-status.ok{background:#123524;border-color:#2d6a4f;color:#a7f3d0}
 .ocr-preview{max-width:100%;border-radius:10px;border:1px solid #e5eaf2;margin:8px 0;display:none}
 .ocr-preview.show{display:block}
 
 </style>
 </head>
 <body>
-<div style="position:fixed;bottom:2px;right:2px;background:#101827;color:#fff;font-size:7px;padding:2px 5px;border-radius:5px;z-index:999;opacity:.7">NIVEL1 FIX</div>
 <div class="app">
   <header class="topbar">
     <div class="brand"><div class="logo">DF</div><div><h1>Drivers Finanzas <span style="display:inline-block;font-size:9px;letter-spacing:.08em;vertical-align:middle;padding:4px 6px;border-radius:6px;background:#eaf0ff;color:#3468f5;margin-left:3px">PRO</span></h1><p>Control inteligente de tus ingresos de transporte</p></div></div>
@@ -179,7 +179,7 @@ body.dark #ocr-status{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
           <div class="card-head"><div><h2>Viajes</h2><p>Registra cada viaje en pocos segundos.</p></div></div>
           
 <div class="nivel1-actions">
-  <label class="n1-btn" for="ocr-file-input"><span style="font-size:22px">📷</span><b>Captura</b><small>Bolt / Uber</small></label>
+  <label class="n1-btn" for="ocr-file-input"><span style="font-size:22px">📷</span><b>Captura</b><small>Toda la pantalla, sin recorte</small></label>
   <button type="button" class="n1-btn voice" id="voice-btn"><span style="font-size:22px">🎤</span><b id="voice-label">Voz</b><small>Ej: 25 mil</small></button>
 </div>
 <input type="file" id="ocr-file-input" accept="image/*" style="display:none">
@@ -507,50 +507,58 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
 
 <script>
 document.getElementById('open-exec-dashboard')?.addEventListener('click', function(){
-  try{
-    var period = summaryPeriod || 'all';
-    var trips = state.trips.filter(function(t){ return dateWithin(t.date, period); });
-    var exps = state.expenses.filter(function(x){ return dateWithin(x.date, period); });
-    var inc=0,gross=0,exp=0;
-    trips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
-    exps.forEach(function(x){ exp+=Number(x.amount)||0; });
-    var win=window.open('', '_blank','width=1000,height=800');
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ejecutivo</title><style>body{font-family:system-ui,sans-serif;background:#f6f8fb} .page{max-width:1000px;margin:0 auto;background:#fff;padding:20px}</style></head><body><div class="page"><h2>Dashboard - '+period+'</h2><p>Netos: '+money(inc)+' - Ganancia: '+money(inc-exp)+'</p><p>Viajes: '+trips.length+'</p></div></body></html>');
-    win.document.close();
-  }catch(e){ console.error(e); }
+  var period = summaryPeriod || 'all';
+  var trips = state.trips.filter(function(t){ return dateWithin(t.date, period); });
+  var exps = state.expenses.filter(function(x){ return dateWithin(x.date, period); });
+  var inc=0,gross=0,exp=0;
+  trips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
+  exps.forEach(function(x){ exp+=Number(x.amount)||0; });
+  var win=window.open('', '_blank','width=1000,height=800');
+  win.document.write('<html><body><h2>Dashboard '+period+'</h2><p>Netos: '+money(inc)+'</p></body></html>');
+  win.document.close();
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-// NIVEL1 FIX - OCR + VOZ CORREGIDO
+// PRACTICO - Sin recorte necesario
 (function(){
   var ocrInput=document.getElementById('ocr-file-input');
   var ocrStatus=document.getElementById('ocr-status');
   var ocrPreview=document.getElementById('ocr-preview');
   var voiceBtn=document.getElementById('voice-btn');
   var voiceLabel=document.getElementById('voice-label');
-  function showStatus(m,s){ if(!ocrStatus) return; ocrStatus.textContent=m; ocrStatus.classList.toggle('show',!!s); }
-  
-  function preprocessImage(file){
-    return new Promise(function(resolve, reject){
-      var reader=new FileReader();
-      reader.onload=function(e){
+  function showStatus(m,cls){ if(!ocrStatus) return; ocrStatus.textContent=m; ocrStatus.className=cls?'show '+cls:'show'; }
+  function hideStatus(){ if(ocrStatus) ocrStatus.className=''; }
+
+  function preprocess(file){
+    return new Promise(function(res,rej){
+      var r=new FileReader();
+      r.onload=function(ev){
         var img=new Image();
         img.onload=function(){
-          var canvas=document.createElement('canvas');
-          var maxW=1000;
-          var scale=Math.min(1, maxW/img.width);
-          canvas.width=img.width*scale;
-          canvas.height=img.height*scale;
-          var ctx=canvas.getContext('2d');
-          ctx.drawImage(img,0,0,canvas.width,canvas.height);
-          resolve(canvas);
+          var c=document.createElement('canvas');
+          var w=img.width, h=img.height;
+          var maxW=1200;
+          if(w>maxW){ h=h*(maxW/w); w=maxW; }
+          c.width=w; c.height=h;
+          var ctx=c.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          // Mejorar contraste para texto verde de Bolt
+          var id=ctx.getImageData(0,0,w,h);
+          var d=id.data;
+          for(var i=0;i<d.length;i+=4){
+            var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+            // Umbral para resaltar texto oscuro sobre fondo claro
+            d[i]=d[i+1]=d[i+2]=gray>180?255:gray<100?0:gray;
+          }
+          ctx.putImageData(id,0,0);
+          res(c);
         };
-        img.onerror=reject;
-        img.src=e.target.result;
+        img.onerror=rej;
+        img.src=ev.target.result;
       };
-      reader.onerror=reject;
-      reader.readAsDataURL(file);
+      r.onerror=rej;
+      r.readAsDataURL(file);
     });
   }
 
@@ -558,105 +566,103 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
     ocrInput.addEventListener('change', async function(e){
       var file=e.target.files[0]; if(!file) return;
       if(ocrPreview){ ocrPreview.src=URL.createObjectURL(file); ocrPreview.classList.add('show'); }
-      showStatus('📷 Leyendo...',true);
+      showStatus('📷 Leyendo toda la captura...', '');
       try{
-        var canvas=await preprocessImage(file);
-        if(!window.Tesseract) throw new Error('Tesseract no cargado');
-        var worker=await Tesseract.createWorker('spa+eng');
-        var ret=await worker.recognize(canvas);
-        await worker.terminate();
-        var txt=ret.data.text||'';
-        console.log('OCR texto:', txt);
-        var amounts=[];
-        var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
-        var m;
-        while((m=re.exec(txt))!==null){
-          var raw=m[1].replace(/[^0-9]/g,'');
-          var n=parseInt(raw,10);
-          if(n>=1000 && n<=100000) amounts.push(n);
-        }
-        // Caso especial Bolt compensación: suma si hay 2 montos (ej 16900+9900)
-        var amount=null;
-        if(amounts.length>=2){
-          // Si detecta "Total" o "compensación", suma los mayores
-          var sorted=amounts.slice().sort(function(a,b){return b-a;});
-          // Si hay 3 montos y el mayor es suma de los otros 2, usar el mayor (ej 26800 = 16900+9900)
-          if(sorted.length>=3 && sorted[0]===sorted[1]+sorted[2]){
-            amount=sorted[0];
-          } else if(txt.toLowerCase().includes('compensac') || txt.toLowerCase().includes('total')){
-            // Buscar linea con Total
-            var totalMatch=txt.match(/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i);
-            if(totalMatch){
-              amount=parseInt(totalMatch[1].replace(/[^0-9]/g,''),10);
-            } else {
-              amount=Math.max.apply(null, amounts);
+        if(!window.Tesseract || !Tesseract.recognize) throw new Error('OCR no cargado - verifica internet');
+        var canvas=await preprocess(file);
+        showStatus('📷 Analizando... 0%', '');
+        var result=await Tesseract.recognize(canvas, 'eng', {
+          logger:function(m){
+            if(m.status==='recognizing text'){
+              var pct=Math.round(m.progress*100);
+              showStatus('📷 Leyendo... '+pct+'%', '');
             }
-          } else {
-            amount=Math.max.apply(null, amounts);
           }
-        } else if(amounts.length===1){
-          amount=amounts[0];
+        });
+        var txt=result.data.text||'';
+        console.log('OCR RAW:', txt);
+        var amounts=[];
+        // Regex mejorado para Bolt: busca números de 4-6 dígitos, con o sin coma
+        var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
+        var mm;
+        while((mm=re.exec(txt))!==null){
+          var raw=mm[1].replace(/[^0-9]/g,'');
+          var n=parseInt(raw,10);
+          if(n>=1000 && n<=200000) amounts.push(n);
         }
-        // Fallback: si no detectó, usar el mayor número
-        if(!amount && amounts.length) amount=Math.max.apply(null, amounts);
+        // Caso especial: si hay varios, el mayor suele ser el total
+        var amount=null;
+        if(amounts.length){
+          // Si texto contiene "Total" o "compensación", buscar el número después de Total
+          var totalRe=/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i;
+          var totalMatch=txt.match(totalRe);
+          if(totalMatch){
+            amount=parseInt(totalMatch[1].replace(/[^0-9]/g,''),10);
+          } else {
+            // Para tu caso 8900 solo, o 16900+9900=26800, tomar el máximo
+            amount=Math.max.apply(null, amounts);
+            // Si hay 3 números donde uno es suma de otros dos, ese es el total (26800 = 16900+9900)
+            if(amounts.length>=3){
+              var sorted=amounts.slice().sort(function(a,b){return b-a;});
+              if(sorted[0]===sorted[1]+sorted[2]) amount=sorted[0];
+              // Si no, si el mayor es >20000 y hay 2 menores, probablemente el mayor es total
+            }
+          }
+        }
 
         var lower=txt.toLowerCase();
         var service='Bolt Auto';
-        if(lower.includes('moto')) service=lower.includes('uber')?'Uber Moto':'Bolt Moto';
-        else if(lower.includes('uber')) service='Uber Auto';
+        if(lower.indexOf('moto')!==-1) service=lower.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
+        else if(lower.indexOf('uber')!==-1) service='Uber Auto';
         var payment='Efectivo';
-        if(lower.includes('tarjeta')||lower.includes('card')) payment='Tarjeta';
-        else if(lower.includes('transfer')) payment='Transferencia';
-        if(lower.includes('efectivo')||lower.includes('recoge')||lower.includes('recoger')) payment='Efectivo';
+        if(lower.indexOf('tarjeta')!==-1||lower.indexOf('card')!==-1) payment='Tarjeta';
+        else if(lower.indexOf('transfer')!==-1) payment='Transferencia';
+        else if(lower.indexOf('efectivo')!==-1||lower.indexOf('recoge')!==-1||lower.indexOf('recoger')!==-1) payment='Efectivo';
 
-        showStatus('✅ '+(amount?'₲'+amount+' ':'No detectado ')+service+' '+payment, true);
-        setTimeout(function(){ showStatus('',false); }, 4000);
-        
-        try{
+        if(amount){
+          showStatus('✅ Detectado: ₲'+amount.toLocaleString()+' - '+service+' '+payment, 'ok');
           if(window.selectService) selectService(service);
           var ai=document.getElementById('trip-amount');
-          if(ai && amount){ ai.value=amount; ai.dispatchEvent(new Event('input')); }
+          if(ai){ ai.value=amount; ai.dispatchEvent(new Event('input')); }
           if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
           if(window.updatePreview) updatePreview();
           var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-          if(amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 500); }
-          if(!amount){ alert('No pude leer el monto. Ingresalo manual. Texto leído: '+txt.substring(0,100)); }
-        }catch(err){ console.error(err); }
+          setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); hideStatus(); }, 800);
+        } else {
+          showStatus('⚠️ No pude leer el monto, pero abrí el formulario - ingresalo manual', 'error');
+          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+          console.log('Amounts encontrados:', amounts, 'Texto:', txt);
+        }
       }catch(err){
-        console.error(err);
-        showStatus('❌ Error: '+err.message+' - intenta recortar la captura solo al precio', true);
-        // Fallback manual
+        console.error('OCR Error:', err);
+        showStatus('❌ Error: '+(err.message||'desconocido')+'. Se abrió el formulario para carga manual', 'error');
         var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+        setTimeout(function(){ hideStatus(); }, 4000);
       }
       e.target.value='';
     });
   }
 
-  // VOZ - FIX REGEX
+  // VOZ - TOTALMENTE REESCRITO SIN \d
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   var rec=null; var listening=false;
   function parseVoice(t){
     var low=t.toLowerCase();
     var amt=null;
-    // 25 mil, 25k, 25000
-    var m1=low.match(/(\d+)\s*mil/);
-    var m2=low.match(/(\d+)\s*k/);
-    var m3=low.match(/\b(\d{4,6})\b/);
-    // Corregido: usar \d en string necesita doble escape, pero en regex literal es \d -> /\d/ es literal \d, por eso usamos RegExp
-    // Reescribimos con RegExp correctamente
-    var reMil=/([0-9]+)\s*mil/;
-    var reK=/([0-9]+)\s*k/;
-    var reNum=/\b([0-9]{4,6})\b/;
-    // Usar bien
-    var mm1=low.match(reMil);
-    var mm2=low.match(reK);
-    var mm3=low.match(reNum);
-    if(mm1) amt=parseInt(mm1[1],10)*1000;
-    else if(mm2) amt=parseInt(mm2[1],10)*1000;
-    else if(mm3) amt=parseInt(mm3[1],10);
-    else {
-      var mm4=low.match(/([0-9]+)/);
-      if(mm4){ var n=parseInt(mm4[1],10); if(n<1000) n=n*1000; amt=n; }
+    // Usar solo [0-9] para evitar \d
+    var reMil=/([0-9]+)[ ]*mil/;
+    var reK=/([0-9]+)[ ]*k/;
+    var reNum=/[^0-9]([0-9]{4,6})[^0-9]/;
+    var m1=low.match(reMil);
+    var m2=low.match(reK);
+    var m3=low.match(reNum);
+    var m4=low.match(/([0-9]{1,3})/);
+    if(m1) amt=parseInt(m1[1],10)*1000;
+    else if(m2) amt=parseInt(m2[1],10)*1000;
+    else if(m3) amt=parseInt(m3[1],10);
+    else if(m4){
+      var n=parseInt(m4[1],10);
+      if(n>=1 && n<=999){ amt=n*1000; } else { amt=n; }
     }
     var pay='Efectivo';
     if(low.indexOf('tarjeta')!==-1) pay='Tarjeta';
@@ -664,36 +670,40 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
     var serv='Bolt Auto';
     if(low.indexOf('moto')!==-1) serv=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
     else if(low.indexOf('uber')!==-1) serv='Uber Auto';
-    return {amount:amt,payment:pay,service:serv};
+    else if(low.indexOf('bolt')!==-1) serv='Bolt Auto';
+    return {amount:amt,payment:pay,service:serv,raw:t};
   }
 
   if(voiceBtn){
     voiceBtn.addEventListener('click',function(){
-      if(!SR){ alert('Tu navegador no soporta voz. Usa Chrome'); return; }
-      if(listening&&rec){ rec.stop(); return; }
+      if(!SR){ alert('Voz solo funciona en Chrome Android'); return; }
+      if(listening&&rec){ try{ rec.stop(); }catch(e){} return; }
       rec=new SR();
-      rec.lang='es-ES';
+      rec.lang='es-PY';
+      rec.continuous=false;
       rec.interimResults=false;
-      rec.maxAlternatives=1;
-      rec.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Di: 25 mil efectivo',true); };
-      rec.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('',false); };
-      rec.onerror=function(e){ listening=false; showStatus('❌ Voz: '+e.error,true); if(voiceLabel) voiceLabel.textContent='Voz'; };
+      rec.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Decí: "25 mil efectivo"', ''); };
+      rec.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; };
+      rec.onerror=function(e){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('❌ Voz: '+e.error+' - probá de nuevo', 'error'); setTimeout(hideStatus,3000); };
       rec.onresult=function(e){
         var tr=e.results[0][0].transcript;
-        console.log('Voz transcripción:', tr);
+        console.log('Voz:', tr);
         var p=parseVoice(tr);
-        showStatus('🎤 "'+tr+'" → '+(p.amount?'₲'+p.amount+' ':'')+p.service+' '+p.payment,true);
-        setTimeout(function(){ showStatus('',false); }, 4000);
-        try{
+        if(p.amount){
+          showStatus('🎤 Entendí: "'+tr+'" → ₲'+p.amount+' '+p.service, 'ok');
           if(window.selectService) selectService(p.service);
-          if(p.amount){ var ai=document.getElementById('trip-amount'); if(ai){ ai.value=p.amount; ai.dispatchEvent(new Event('input')); } }
+          var ai=document.getElementById('trip-amount');
+          if(ai){ ai.value=p.amount; ai.dispatchEvent(new Event('input')); }
           if(typeof window.setPaymentMethod==='function') setPaymentMethod(p.payment);
           if(window.updatePreview) updatePreview();
           var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-          if(p.amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 600); }
-        }catch(err){ console.error(err); }
+          setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); hideStatus(); }, 800);
+        } else {
+          showStatus('🎤 Escuché: "'+tr+'" - no detecté monto, decí "25 mil"', 'error');
+          setTimeout(hideStatus,4000);
+        }
       };
-      try{ rec.start(); }catch(err){ alert('Error voz: '+err.message); }
+      try{ rec.start(); }catch(err){ showStatus('❌ Error voz: '+err.message, 'error'); }
     });
   }
 })();
