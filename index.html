@@ -25,7 +25,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
-<title>Drivers Finanzas Pro | NIVEL 1 OCR VOZ</title>
+<title>Drivers Finanzas Pro | NIVEL1 FIX</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -134,15 +134,18 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 .n1-btn{border:1.5px dashed #b9c7e8;background:#f7f9ff;border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:11px;color:#3a5ab8;cursor:pointer;text-align:center}
 .n1-btn small{font-weight:400;font-size:9px}
 .n1-btn.voice{border-color:#c8ecd9;background:#eefaf4;color:#1a7a4a}
-#ocr-status{font-size:11px;color:#6b7a90;text-align:center;padding:8px;display:none;background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;margin-bottom:8px}
+body.dark .n1-btn{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
+body.dark .n1-btn.voice{background:#1a2e26;border-color:#2d5a42;color:#7dd8a8}
+#ocr-status{font-size:11px;text-align:center;padding:8px;display:none;background:#f7f9ff;border:1px dashed #cdd9f0;border-radius:8px;margin-bottom:8px}
 #ocr-status.show{display:block}
+body.dark #ocr-status{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
 .ocr-preview{max-width:100%;border-radius:10px;border:1px solid #e5eaf2;margin:8px 0;display:none}
 .ocr-preview.show{display:block}
 
 </style>
 </head>
 <body>
-<div style="position:fixed;top:2px;right:2px;background:#101827;color:#fff;font-size:8px;padding:2px 6px;border-radius:6px;z-index:99999">NIVEL1 OCR+VOZ</div>
+<div style="position:fixed;bottom:2px;right:2px;background:#101827;color:#fff;font-size:7px;padding:2px 5px;border-radius:5px;z-index:999;opacity:.7">NIVEL1 FIX</div>
 <div class="app">
   <header class="topbar">
     <div class="brand"><div class="logo">DF</div><div><h1>Drivers Finanzas <span style="display:inline-block;font-size:9px;letter-spacing:.08em;vertical-align:middle;padding:4px 6px;border-radius:6px;background:#eaf0ff;color:#3468f5;margin-left:3px">PRO</span></h1><p>Control inteligente de tus ingresos de transporte</p></div></div>
@@ -176,8 +179,8 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
           <div class="card-head"><div><h2>Viajes</h2><p>Registra cada viaje en pocos segundos.</p></div></div>
           
 <div class="nivel1-actions">
-  <label class="n1-btn" for="ocr-file-input" style="cursor:pointer"><span style="font-size:22px">📷</span><b>Captura</b><small>Bolt / Uber</small></label>
-  <button type="button" class="n1-btn voice" id="voice-btn"><span style="font-size:22px">🎤</span><b id="voice-label">Voz</b><small>25 mil</small></button>
+  <label class="n1-btn" for="ocr-file-input"><span style="font-size:22px">📷</span><b>Captura</b><small>Bolt / Uber</small></label>
+  <button type="button" class="n1-btn voice" id="voice-btn"><span style="font-size:22px">🎤</span><b id="voice-label">Voz</b><small>Ej: 25 mil</small></button>
 </div>
 <input type="file" id="ocr-file-input" accept="image/*" style="display:none">
 <div id="ocr-status"></div>
@@ -503,7 +506,6 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
 </script>
 
 <script>
-// EJECUTIVO
 document.getElementById('open-exec-dashboard')?.addEventListener('click', function(){
   try{
     var period = summaryPeriod || 'all';
@@ -513,15 +515,14 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
     trips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
     exps.forEach(function(x){ exp+=Number(x.amount)||0; });
     var win=window.open('', '_blank','width=1000,height=800');
-    if(!win){ toast('Permite popups'); return; }
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ejecutivo</title><style>body{font-family:system-ui,sans-serif;margin:0;background:#f6f8fb} .page{max-width:1000px;margin:0 auto;background:#fff;padding:20px} .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} .kpi{border:1px solid #e5eaf2;border-radius:12px;padding:12px} .kpi.dark{background:#101827;color:#fff}</style></head><body><div class="page"><h2>Dashboard Ejecutivo - '+period+'</h2><div class="kpis"><div class="kpi"><span>Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia</span><strong>'+money(inc-exp)+'</strong></div></div><p>Viajes: '+trips.length+' - Gastos: '+exps.length+'</p></div></body></html>');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ejecutivo</title><style>body{font-family:system-ui,sans-serif;background:#f6f8fb} .page{max-width:1000px;margin:0 auto;background:#fff;padding:20px}</style></head><body><div class="page"><h2>Dashboard - '+period+'</h2><p>Netos: '+money(inc)+' - Ganancia: '+money(inc-exp)+'</p><p>Viajes: '+trips.length+'</p></div></body></html>');
     win.document.close();
   }catch(e){ console.error(e); }
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <script>
-// NIVEL1 OCR + VOZ
+// NIVEL1 FIX - OCR + VOZ CORREGIDO
 (function(){
   var ocrInput=document.getElementById('ocr-file-input');
   var ocrStatus=document.getElementById('ocr-status');
@@ -529,24 +530,76 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
   var voiceBtn=document.getElementById('voice-btn');
   var voiceLabel=document.getElementById('voice-label');
   function showStatus(m,s){ if(!ocrStatus) return; ocrStatus.textContent=m; ocrStatus.classList.toggle('show',!!s); }
+  
+  function preprocessImage(file){
+    return new Promise(function(resolve, reject){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var img=new Image();
+        img.onload=function(){
+          var canvas=document.createElement('canvas');
+          var maxW=1000;
+          var scale=Math.min(1, maxW/img.width);
+          canvas.width=img.width*scale;
+          canvas.height=img.height*scale;
+          var ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          resolve(canvas);
+        };
+        img.onerror=reject;
+        img.src=e.target.result;
+      };
+      reader.onerror=reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   if(ocrInput){
     ocrInput.addEventListener('change', async function(e){
       var file=e.target.files[0]; if(!file) return;
       if(ocrPreview){ ocrPreview.src=URL.createObjectURL(file); ocrPreview.classList.add('show'); }
       showStatus('📷 Leyendo...',true);
       try{
-        if(!window.Tesseract) throw new Error('Sin Tesseract - necesita internet');
-        var r=await Tesseract.recognize(file,'spa+eng',{logger:function(mm){ if(mm.status==='recognizing text'){ showStatus('📷 '+Math.round(mm.progress*100)+'%',true); } }});
-        var txt=r.data.text||'';
+        var canvas=await preprocessImage(file);
+        if(!window.Tesseract) throw new Error('Tesseract no cargado');
+        var worker=await Tesseract.createWorker('spa+eng');
+        var ret=await worker.recognize(canvas);
+        await worker.terminate();
+        var txt=ret.data.text||'';
+        console.log('OCR texto:', txt);
         var amounts=[];
         var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
         var m;
         while((m=re.exec(txt))!==null){
           var raw=m[1].replace(/[^0-9]/g,'');
           var n=parseInt(raw,10);
-          if(n>=1000 && n<=500000) amounts.push(n);
+          if(n>=1000 && n<=100000) amounts.push(n);
         }
-        var amount=amounts.length?Math.max.apply(null,amounts):null;
+        // Caso especial Bolt compensación: suma si hay 2 montos (ej 16900+9900)
+        var amount=null;
+        if(amounts.length>=2){
+          // Si detecta "Total" o "compensación", suma los mayores
+          var sorted=amounts.slice().sort(function(a,b){return b-a;});
+          // Si hay 3 montos y el mayor es suma de los otros 2, usar el mayor (ej 26800 = 16900+9900)
+          if(sorted.length>=3 && sorted[0]===sorted[1]+sorted[2]){
+            amount=sorted[0];
+          } else if(txt.toLowerCase().includes('compensac') || txt.toLowerCase().includes('total')){
+            // Buscar linea con Total
+            var totalMatch=txt.match(/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i);
+            if(totalMatch){
+              amount=parseInt(totalMatch[1].replace(/[^0-9]/g,''),10);
+            } else {
+              amount=Math.max.apply(null, amounts);
+            }
+          } else {
+            amount=Math.max.apply(null, amounts);
+          }
+        } else if(amounts.length===1){
+          amount=amounts[0];
+        }
+        // Fallback: si no detectó, usar el mayor número
+        if(!amount && amounts.length) amount=Math.max.apply(null, amounts);
+
         var lower=txt.toLowerCase();
         var service='Bolt Auto';
         if(lower.includes('moto')) service=lower.includes('uber')?'Uber Moto':'Bolt Moto';
@@ -554,45 +607,93 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
         var payment='Efectivo';
         if(lower.includes('tarjeta')||lower.includes('card')) payment='Tarjeta';
         else if(lower.includes('transfer')) payment='Transferencia';
-        showStatus('✅ '+(amount?'₲'+amount+' ':'')+service+' '+payment,true);
-        if(window.selectService) selectService(service);
-        var ai=document.getElementById('trip-amount'); if(ai&&amount) ai.value=amount;
-        if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
-        if(window.updatePreview) updatePreview();
+        if(lower.includes('efectivo')||lower.includes('recoge')||lower.includes('recoger')) payment='Efectivo';
+
+        showStatus('✅ '+(amount?'₲'+amount+' ':'No detectado ')+service+' '+payment, true);
+        setTimeout(function(){ showStatus('',false); }, 4000);
+        
+        try{
+          if(window.selectService) selectService(service);
+          var ai=document.getElementById('trip-amount');
+          if(ai && amount){ ai.value=amount; ai.dispatchEvent(new Event('input')); }
+          if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
+          if(window.updatePreview) updatePreview();
+          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+          if(amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 500); }
+          if(!amount){ alert('No pude leer el monto. Ingresalo manual. Texto leído: '+txt.substring(0,100)); }
+        }catch(err){ console.error(err); }
+      }catch(err){
+        console.error(err);
+        showStatus('❌ Error: '+err.message+' - intenta recortar la captura solo al precio', true);
+        // Fallback manual
         var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-        if(amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); },400); }
-      }catch(err){ showStatus('❌ '+err.message,true); console.error(err); }
+      }
       e.target.value='';
     });
   }
+
+  // VOZ - FIX REGEX
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   var rec=null; var listening=false;
   function parseVoice(t){
-    var low=t.toLowerCase(); var amt=null;
-    var mm=low.match(/(\d+)\s*(mil|k)/); if(mm) amt=parseInt(mm[1],10)*1000; else { var m2=low.match(/\b(\d{4,6})\b/); if(m2) amt=parseInt(m2[1],10); }
-    var pay='Efectivo'; if(low.includes('tarjeta')) pay='Tarjeta'; else if(low.includes('transfer')) pay='Transferencia';
-    var serv='Bolt Auto'; if(low.includes('moto')) serv=low.includes('uber')?'Uber Moto':'Bolt Moto'; else if(low.includes('uber')) serv='Uber Auto';
+    var low=t.toLowerCase();
+    var amt=null;
+    // 25 mil, 25k, 25000
+    var m1=low.match(/(\d+)\s*mil/);
+    var m2=low.match(/(\d+)\s*k/);
+    var m3=low.match(/\b(\d{4,6})\b/);
+    // Corregido: usar \d en string necesita doble escape, pero en regex literal es \d -> /\d/ es literal \d, por eso usamos RegExp
+    // Reescribimos con RegExp correctamente
+    var reMil=/([0-9]+)\s*mil/;
+    var reK=/([0-9]+)\s*k/;
+    var reNum=/\b([0-9]{4,6})\b/;
+    // Usar bien
+    var mm1=low.match(reMil);
+    var mm2=low.match(reK);
+    var mm3=low.match(reNum);
+    if(mm1) amt=parseInt(mm1[1],10)*1000;
+    else if(mm2) amt=parseInt(mm2[1],10)*1000;
+    else if(mm3) amt=parseInt(mm3[1],10);
+    else {
+      var mm4=low.match(/([0-9]+)/);
+      if(mm4){ var n=parseInt(mm4[1],10); if(n<1000) n=n*1000; amt=n; }
+    }
+    var pay='Efectivo';
+    if(low.indexOf('tarjeta')!==-1) pay='Tarjeta';
+    else if(low.indexOf('transfer')!==-1) pay='Transferencia';
+    var serv='Bolt Auto';
+    if(low.indexOf('moto')!==-1) serv=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
+    else if(low.indexOf('uber')!==-1) serv='Uber Auto';
     return {amount:amt,payment:pay,service:serv};
   }
+
   if(voiceBtn){
     voiceBtn.addEventListener('click',function(){
-      if(!SR){ alert('Usa Chrome'); return; }
+      if(!SR){ alert('Tu navegador no soporta voz. Usa Chrome'); return; }
       if(listening&&rec){ rec.stop(); return; }
-      rec=new SR(); rec.lang='es-PY';
+      rec=new SR();
+      rec.lang='es-ES';
+      rec.interimResults=false;
+      rec.maxAlternatives=1;
       rec.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Di: 25 mil efectivo',true); };
       rec.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('',false); };
+      rec.onerror=function(e){ listening=false; showStatus('❌ Voz: '+e.error,true); if(voiceLabel) voiceLabel.textContent='Voz'; };
       rec.onresult=function(e){
         var tr=e.results[0][0].transcript;
+        console.log('Voz transcripción:', tr);
         var p=parseVoice(tr);
-        showStatus('🎤 '+tr,true);
-        if(window.selectService) selectService(p.service);
-        if(p.amount){ var ai=document.getElementById('trip-amount'); if(ai) ai.value=p.amount; }
-        if(typeof window.setPaymentMethod==='function') setPaymentMethod(p.payment);
-        if(window.updatePreview) updatePreview();
-        var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-        if(p.amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); },400); }
+        showStatus('🎤 "'+tr+'" → '+(p.amount?'₲'+p.amount+' ':'')+p.service+' '+p.payment,true);
+        setTimeout(function(){ showStatus('',false); }, 4000);
+        try{
+          if(window.selectService) selectService(p.service);
+          if(p.amount){ var ai=document.getElementById('trip-amount'); if(ai){ ai.value=p.amount; ai.dispatchEvent(new Event('input')); } }
+          if(typeof window.setPaymentMethod==='function') setPaymentMethod(p.payment);
+          if(window.updatePreview) updatePreview();
+          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
+          if(p.amount){ setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 600); }
+        }catch(err){ console.error(err); }
       };
-      rec.start();
+      try{ rec.start(); }catch(err){ alert('Error voz: '+err.message); }
     });
   }
 })();
