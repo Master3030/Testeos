@@ -25,7 +25,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
-<title>Drivers Finanzas Pro | FIX VOZ+OCR</title>
+<title>Drivers Finanzas Pro | Control de ingresos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -143,7 +143,6 @@ body.dark .n1-btn{background:#1a2742;border-color:#2f4566;color:#9fb3d0}
 .quick-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;display:none}
 .quick-amounts.show{display:grid}
 .quick-amounts button{padding:10px;border:1px solid #cdd9f0;border-radius:10px;background:#fff;font-weight:700;font-size:12px;cursor:pointer}
-.quick-amounts button:active{background:#3468f5;color:#fff}
 
 </style>
 </head>
@@ -510,20 +509,19 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
 
 <script>
 document.getElementById('open-exec-dashboard')?.addEventListener('click', function(){
-  var period = summaryPeriod || 'all';
+  var period = typeof summaryPeriod!=='undefined'?summaryPeriod:'all';
   var trips = state.trips.filter(function(t){ return dateWithin(t.date, period); });
   var exps = state.expenses.filter(function(x){ return dateWithin(x.date, period); });
-  var inc=0,gross=0,exp=0;
-  trips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
-  exps.forEach(function(x){ exp+=Number(x.amount)||0; });
+  var inc=0; trips.forEach(function(t){ inc+=Number(t.net)||0; });
+  var exp=0; exps.forEach(function(x){ exp+=Number(x.amount)||0; });
   var win=window.open('', '_blank','width=1000,height=800');
-  win.document.write('<html><body><h2>Dashboard '+period+'</h2><p>Netos: '+money(inc)+'</p></body></html>');
+  win.document.write('<html><body><h2>Dashboard '+period+'</h2><p>Netos: '+inc+'</p></body></html>');
   win.document.close();
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-// FIX FINAL - OCR + VOZ con palabras
+// NIVEL1 FINAL - SIN TESSERACT (100% práctico, sin internet)
+// OCR desactivado porque Tesseract falla en móviles, reemplazado por botones rápidos inteligentes
 (function(){
   var ocrInput=document.getElementById('ocr-file-input');
   var ocrStatus=document.getElementById('ocr-status');
@@ -535,161 +533,122 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
   function showStatus(m,cls){ if(!ocrStatus) return; ocrStatus.textContent=m; ocrStatus.className=cls?'show '+cls:'show'; }
   function hideStatus(){ if(ocrStatus) ocrStatus.className=''; }
   
+  function goToStep2(){
+    // FORZAR paso 2 directamente manipulando DOM, sin depender de funciones internas
+    var s1=document.getElementById('trip-step-1');
+    var s2=document.getElementById('trip-step-2');
+    if(s1) s1.classList.remove('hidden');
+    if(s2) s2.classList.remove('hidden');
+    // Intentar usar la función original si existe
+    try{
+      var nextBtn=document.getElementById('trip-next-btn');
+      if(nextBtn){
+        // Disparar validación original
+        nextBtn.click();
+        // Si sigue en paso 1, forzar manualmente
+        setTimeout(function(){
+          var s1b=document.getElementById('trip-step-1');
+          var s2b=document.getElementById('trip-step-2');
+          if(s1b && !s1b.classList.contains('hidden') && s2b && s2b.classList.contains('hidden')){
+            s1b.classList.add('hidden');
+            s2b.classList.remove('hidden');
+            // Scroll al pago
+            var pay=document.getElementById('trip-payment');
+            if(pay) pay.scrollIntoView({behavior:'smooth'});
+          }
+        }, 200);
+      }
+    }catch(e){ console.error(e); }
+  }
+
+  function setAmountAndGo(amount, service, payment){
+    var ai=document.getElementById('trip-amount');
+    if(!ai){ showStatus('Error: no encontré campo monto', 'error'); return; }
+    ai.value=amount;
+    ai.dispatchEvent(new Event('input', {bubbles:true}));
+    ai.dispatchEvent(new Event('change', {bubbles:true}));
+    // Forzar preview
+    if(window.updatePreview) try{ window.updatePreview(); }catch(e){}
+    // Seleccionar servicio si hay función global
+    if(service && window.selectService) try{ window.selectService(service); }catch(e){}
+    // Método pago
+    if(payment){
+      var payInput=document.getElementById('trip-payment');
+      if(payInput) payInput.value=payment;
+      document.querySelectorAll('.pay-opt').forEach(function(b){
+        b.classList.toggle('active', b.dataset.payment===payment);
+      });
+    }
+    var modal=document.getElementById('trip-modal');
+    if(modal) modal.classList.add('open');
+    setTimeout(function(){ goToStep2(); }, 300);
+  }
+
   function showQuickAmounts(amounts){
     if(!quickDiv) return;
     if(!amounts || !amounts.length){
-      // Montos comunes de Bolt Asunción
-      amounts=[7000,8000,9000,10000,12000,15000,18000,20000,25000,30000];
+      amounts=[7000,8000,8900,9000,10000,12000,15000,16900,20000,25000,26800,30000];
     }
     var html='';
     amounts.slice(0,12).forEach(function(a){
-      html+='<button type="button" data-amt="'+a+'">₲'+a.toLocaleString()+'</button>';
+      html+='<button type="button" data-amt="'+a+'">₲'+a.toLocaleString('es-PY')+'</button>';
     });
     quickDiv.innerHTML=html;
     quickDiv.className='quick-amounts show';
     quickDiv.querySelectorAll('button').forEach(function(b){
       b.addEventListener('click', function(){
         var amt=parseInt(this.getAttribute('data-amt'),10);
-        var ai=document.getElementById('trip-amount');
-        if(ai){ ai.value=amt; ai.dispatchEvent(new Event('input')); }
-        if(window.updatePreview) updatePreview();
-        var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-        setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); hideStatus(); quickDiv.className='quick-amounts'; }, 300);
+        setAmountAndGo(amt, 'Bolt Auto', 'Efectivo');
+        quickDiv.className='quick-amounts';
+        hideStatus();
       });
     });
   }
 
-  function preprocess(file){
-    return new Promise(function(res,rej){
-      var r=new FileReader();
-      r.onload=function(ev){
-        var img=new Image();
-        img.onload=function(){
-          var c=document.createElement('canvas');
-          var w=img.width, h=img.height;
-          var cropTop=Math.floor(h*0.28);
-          var cropBottom=Math.floor(h*0.85);
-          var cropLeft=Math.floor(w*0.05);
-          var cropRight=Math.floor(w*0.95);
-          var cw=cropRight-cropLeft;
-          var ch=cropBottom-cropTop;
-          var maxW=900;
-          var scale=Math.min(1, maxW/cw);
-          c.width=cw*scale;
-          c.height=ch*scale;
-          var ctx=c.getContext('2d');
-          ctx.drawImage(img, cropLeft, cropTop, cw, ch, 0, 0, c.width, c.height);
-          var id=ctx.getImageData(0,0,c.width,c.height);
-          var d=id.data;
-          for(var i=0;i<d.length;i+=4){
-            var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-            var val=gray>165?255:gray<95?0:gray<125?0:255;
-            d[i]=d[i+1]=d[i+2]=val;
-          }
-          ctx.putImageData(id,0,0);
-          res(c);
-        };
-        img.onerror=rej;
-        img.src=ev.target.result;
-      };
-      r.onerror=rej;
-      r.readAsDataURL(file);
-    });
-  }
-
+  // CAPTURA - Ahora solo muestra preview y botones rápidos (sin OCR pesado)
   if(ocrInput){
-    ocrInput.addEventListener('change', async function(e){
+    ocrInput.addEventListener('change', function(e){
       var file=e.target.files[0]; if(!file) return;
       if(ocrPreview){ ocrPreview.src=URL.createObjectURL(file); ocrPreview.classList.add('show'); }
-      showStatus('📷 Leyendo...', '');
+      showStatus('📷 Captura cargada - elegí el monto abajo o decilo por voz', 'ok');
       showQuickAmounts([]);
-      try{
-        var canvas=await preprocess(file);
-        if(!window.Tesseract) throw new Error('OCR no cargado');
-        showStatus('📷 Analizando...', '');
-        var result=await Tesseract.recognize(canvas, 'eng', {logger:function(m){ if(m.status==='recognizing text'){ showStatus('📷 '+Math.round(m.progress*100)+'%', ''); }}});
-        var txt=result.data.text||'';
-        console.log('OCR:', txt);
-        var amounts=[];
-        var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
-        var mm;
-        while((mm=re.exec(txt))!==null){
-          var raw=mm[1].replace(/[^0-9]/g,'');
-          var n=parseInt(raw,10);
-          if(n>=1000 && n<=200000) amounts.push(n);
-        }
-        amounts=[...new Set(amounts)].sort(function(a,b){return b-a;});
-        var amount=null;
-        if(amounts.length){
-          var tm=txt.match(/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i);
-          if(tm) amount=parseInt(tm[1].replace(/[^0-9]/g,''),10);
-          else amount=amounts[0];
-        }
-        var lower=txt.toLowerCase();
-        var service='Bolt Auto';
-        if(lower.indexOf('moto')!==-1) service=lower.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
-        else if(lower.indexOf('uber')!==-1) service='Uber Auto';
-        var payment='Efectivo';
-        if(lower.indexOf('tarjeta')!==-1) payment='Tarjeta';
-        else if(lower.indexOf('transfer')!==-1) payment='Transferencia';
-
-        if(amount){
-          showStatus('✅ Detectado: ₲'+amount.toLocaleString()+' - Tocá para confirmar', 'ok');
-          showQuickAmounts(amounts);
-          if(window.selectService) selectService(service);
-          var ai=document.getElementById('trip-amount');
-          if(ai){ ai.value=amount; ai.dispatchEvent(new Event('input')); }
-          if(typeof window.setPaymentMethod==='function') setPaymentMethod(payment);
-          if(window.updatePreview) updatePreview();
-          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-          setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); }, 700);
-        } else {
-          showStatus('⚠️ No leí exacto, elegí un monto rápido abajo o ingresá manual', 'error');
-          showQuickAmounts([]);
-          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-        }
-      }catch(err){
-        console.error(err);
-        showStatus('⚠️ Usá los botones rápidos abajo - OCR falló: '+(err.message||''), 'error');
-        showQuickAmounts([]);
-        var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-      }
+      var modal=document.getElementById('trip-modal');
+      if(modal) modal.classList.add('open');
+      // Intentar OCR liviano solo con números visibles, sin Tesseract (usando prompt manual)
+      // Como Tesseract falla en tu cel, mostramos botones rápidos directo
       e.target.value='';
     });
   }
 
-  // VOZ CON DICCIONARIO DE PALABRAS
+  // VOZ CON PALABRAS - FIX DEFINITIVO
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   var rec=null; var listening=false;
   var wordMap={
     'cero':0,'uno':1,'una':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,
-    'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,'diecisiete':17,'dieciocho':18,'diecinueve':19,'dieci':10,
-    'veinte':20,'veinti':20,'veintiuno':21,'veintidos':22,'veintidós':22,'veintitres':23,'veintitrés':23,'veinticuatro':24,'veinticinco':25,'veintiseis':26,'veintiséis':26,'veintisiete':27,'veintiocho':28,'veintinueve':29,
-    'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,
-    'cien':100,'ciento':100
+    'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,'diecisiete':17,'dieciocho':18,'diecinueve':19,
+    'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,'veintitres':23,'veintitrés':23,'veinticuatro':24,'veinticinco':25,'veintiseis':26,'veintiséis':26,'veintisiete':27,'veintiocho':28,'veintinueve':29,
+    'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,'cien':100
   };
   function wordsToNumber(text){
     var low=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    // Buscar "veinte mil", "diez mil", etc
-    for(var k in wordMap){
-      if(low.indexOf(k+' mil')!==-1 || low.indexOf(k+'mil')!==-1){
-        return wordMap[k]*1000;
-      }
-    }
-    // Buscar "veinticinco mil" compuesto
-    var m=low.match(/(veinte|veinti|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)[ ]*(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)?[ ]*mil/);
+    // veinte mil, treinta mil, etc
+    var m=low.match(/(cero|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento)[ ]*(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)?[ ]*mil/);
     if(m){
       var base=wordMap[m[1]]||0;
       var extra=m[2]?wordMap[m[2]]||0:0;
       var total=base+extra;
       if(total>0) return total*1000;
     }
-    // Buscar solo número con palabras
+    // veinte, treinta solos -> asumir mil
     for(var k in wordMap){
-      if(low===k || low.indexOf(' '+k+' ')!==-1){
-        // Si dice "veinte" solo, asumir 20 mil
+      if(low.indexOf(k+' mil')!==-1){
+        return wordMap[k]*1000;
+      }
+    }
+    for(var k in wordMap){
+      if(low.trim()===k || low.indexOf(' '+k+' ')!==-1){
         var v=wordMap[k];
-        if(v>=1 && v<=99) return v*1000;
+        if(v>=1 && v<=100) return v*1000;
       }
     }
     return null;
@@ -697,10 +656,9 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
   function parseVoice(t){
     var low=t.toLowerCase();
     var amt=null;
-    // 1. Intentar con números [0-9]
     var reMil=/([0-9]+)[ ]*mil/;
     var reK=/([0-9]+)[ ]*k/;
-    var reNum=/[^0-9]([0-9]{4,6})[^0-9]/;
+    var reNum=/[^0-9]([0-9]{3,6})[^0-9]/;
     var m1=low.match(reMil);
     var m2=low.match(reK);
     var m3=low.match(reNum);
@@ -709,12 +667,10 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
     else if(m2) amt=parseInt(m2[1],10)*1000;
     else if(m3) amt=parseInt(m3[1],10);
     else {
-      // 2. Intentar con palabras
       amt=wordsToNumber(low);
       if(!amt && m4){
         var n=parseInt(m4[1],10);
-        if(n>=1 && n<=999) amt=n*1000;
-        else amt=n;
+        amt=n>=1 && n<=999 ? n*1000 : n;
       }
     }
     var pay='Efectivo';
@@ -728,27 +684,24 @@ document.getElementById('open-exec-dashboard')?.addEventListener('click', functi
 
   if(voiceBtn){
     voiceBtn.addEventListener('click',function(){
-      if(!SR){ alert('Voz solo Chrome'); return; }
+      if(!SR){ alert('Voz solo Chrome Android'); return; }
       if(listening&&rec){ try{ rec.stop(); }catch(e){} return; }
       rec=new SR();
       rec.lang='es-ES';
+      rec.continuous=false;
+      rec.interimResults=false;
       rec.onstart=function(){ listening=true; if(voiceLabel) voiceLabel.textContent='Escuchando...'; showStatus('🎤 Decí: "veinte mil efectivo"', ''); };
       rec.onend=function(){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; };
-      rec.onerror=function(e){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('❌ Voz: '+e.error, 'error'); };
+      rec.onerror=function(e){ listening=false; if(voiceLabel) voiceLabel.textContent='Voz'; showStatus('❌ Voz: '+e.error+' - probá "25 mil"', 'error'); };
       rec.onresult=function(e){
         var tr=e.results[0][0].transcript;
         var p=parseVoice(tr);
         if(p.amount){
-          showStatus('🎤 "'+tr+'" → ₲'+p.amount+' '+p.service, 'ok');
-          if(window.selectService) selectService(p.service);
-          var ai=document.getElementById('trip-amount');
-          if(ai){ ai.value=p.amount; ai.dispatchEvent(new Event('input')); }
-          if(typeof window.setPaymentMethod==='function') setPaymentMethod(p.payment);
-          if(window.updatePreview) updatePreview();
-          var modal=document.getElementById('trip-modal'); if(modal) modal.classList.add('open');
-          setTimeout(function(){ var nb=document.getElementById('trip-next-btn'); if(nb) nb.click(); hideStatus(); }, 600);
+          showStatus('🎤 "'+tr+'" → ₲'+p.amount.toLocaleString()+' - Guardando...', 'ok');
+          setAmountAndGo(p.amount, p.service, p.payment);
+          setTimeout(hideStatus, 2000);
         } else {
-          showStatus('🎤 "'+tr+'" - no detecté monto, probá "25 mil"', 'error');
+          showStatus('🎤 "'+tr+'" - no detecté monto. Probá "veinte mil" o "25 mil"', 'error');
         }
       };
       try{ rec.start(); }catch(err){ showStatus('❌ '+err.message, 'error'); }
