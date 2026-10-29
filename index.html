@@ -144,6 +144,10 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 #ultra-preview-img{max-width:100%;border-radius:12px;margin-top:8px;display:none;max-height:300px;object-fit:contain}
 #ultra-preview-img.show{display:block}
 
+
+#instant-capture-btn{background:linear-gradient(135deg,#101827,#2a5bd7);color:#fff;border:0;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(42,91,215,.3)}
+#instant-capture-btn small{font-weight:600;font-size:10px;opacity:.9}
+
 </style>
 </head>
 <body>
@@ -181,7 +185,13 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
           
 <div class="nivel1-wrap">
   <div class="nivel1-title">⚡ Registro ultra rápido</div>
-  <div class="nivel1-grid">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+    <button id="instant-capture-btn"><span style="font-size:24px">⚡</span>Instantánea<small>Captura pantalla</small></button>
+    <label class="n1-big cam" for="ultra-cam-input" style="margin:0"><span style="font-size:24px">📷</span>Galería<small>Foto existente</small></label>
+    <button class="n1-big voz" id="ultra-voz-btn" style="margin:0"><span style="font-size:24px">🎤</span><span id="ultra-voz-label">Voz</span><small>Veinte mil</small></button>
+  </div>
+  <div class="nivel1-grid" style="display:none">
+
     <label class="n1-big cam" for="ultra-cam-input"><span style="font-size:28px">📷</span>Captura<span style="font-size:12px;font-weight:700">Bolt/Uber</span><small>Lee monto automático</small></label>
     <button class="n1-big voz" id="ultra-voz-btn"><span style="font-size:28px">🎤</span><span id="ultra-voz-label">Voz</span><small id="ultra-voz-sub">Ej: veinte mil</small></button>
   </div>
@@ -410,7 +420,158 @@ $('download-report-pdf')?.addEventListener('click', ()=>{
   var expRows=''; fExp.slice().reverse().forEach(function(x){ expRows+='<tr><td>'+x.date+'</td><td>'+x.type+'</td><td>'+money(x.amount)+'</td><td>'+(x.comment||'—')+'</td></tr>'; });
   var servRows=''; Object.keys(byServ).forEach(function(s){ servRows+='<tr><td><span class="badge">'+s+'</span></td><td>'+money(byServ[s])+'</td></tr>'; });
   var win=window.open('', '_blank'); if(!win){ toast('Permite ventanas emergentes'); return; }
-  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Período: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' · Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Método de Pago</h2><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Día</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro · Guaraníes paraguayos (₲)</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script></body></html>';
+  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Período: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' · Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Método de Pago</h2><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Día</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro · Guaraníes paraguayos (₲)</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script>
+<script>
+// CAPTURA INSTANTANEA - getDisplayMedia
+(function(){
+  var instantBtn=document.getElementById('instant-capture-btn');
+  var statusEl=document.getElementById('ultra-status');
+  var previewImg=document.getElementById('ultra-preview-img');
+  var ocrCanvas=document.getElementById('ocr-canvas');
+  var svcQuick=document.getElementById('svc-quick');
+
+  function showStat(msg, ok){ if(!statusEl) return; statusEl.textContent=msg; statusEl.className='show '+(ok?'ok':'err'); statusEl.style.display='block'; }
+
+  async function processImageFromCanvas(canvas, detectedPayment){
+    try{
+      showStat('⚡ Analizando captura instantánea...', true);
+      var result=await Tesseract.recognize(canvas, 'eng', {
+        logger:function(m){ if(m.status==='recognizing text'){ showStat('⚡ '+Math.round(m.progress*100)+'%', true); }},
+        tessedit_char_whitelist: '0123456789.,',
+        tessedit_pageseg_mode: '6'
+      });
+      var txt=result.data.text||'';
+      var amounts=[];
+      var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
+      var mm;
+      while((mm=re.exec(txt))!==null){
+        var raw=mm[1].replace(/[^0-9]/g,'');
+        var n=parseInt(raw,10);
+        if(n>=500 && n<=200000) amounts.push(n);
+      }
+      amounts=[...new Set(amounts)].sort(function(a,b){return b-a;});
+      var amount=amounts.length?amounts[0]:null;
+      var totalMatch=txt.match(/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i);
+      if(totalMatch) amount=parseInt(totalMatch[1].replace(/[^0-9]/g,''),10);
+      
+      if(amount){
+        // Detectar servicio - usar último
+        var lastSvc=null; try{ lastSvc=localStorage.getItem('lastService'); }catch(e){}
+        var service=lastSvc||'Bolt Auto';
+        // Mostrar selector
+        if(window.showServiceSelector) window.showServiceSelector(amount, detectedPayment||'Efectivo', service);
+        else showStat('✅ Detecté ₲'+amount.toLocaleString()+' - Seleccioná servicio', true);
+      } else {
+        showStat('⚠️ No leí monto en pantalla - Probá con galería', false);
+      }
+    }catch(err){
+      console.error(err);
+      showStat('❌ Error: '+err.message, false);
+    }
+  }
+
+  if(instantBtn){
+    instantBtn.addEventListener('click', async function(){
+      // Intentar captura de pantalla instantánea
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+        showStat('⚠️ Tu navegador no soporta captura instantánea - Usá Galería o Voz', false);
+        return;
+      }
+      try{
+        showStat('⚡ Seleccioná la ventana de Bolt para capturar...', true);
+        var stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'window'}, audio:false});
+        var video=document.createElement('video');
+        video.srcObject=stream;
+        video.autoplay=true;
+        video.muted=true;
+        await new Promise(function(res){ video.onloadedmetadata=res; });
+        await new Promise(function(r){ setTimeout(r, 800); }); // Esperar 0.8s para que se vea Bolt
+        
+        // Capturar frame
+        ocrCanvas.width=video.videoWidth;
+        ocrCanvas.height=video.videoHeight;
+        var ctx=ocrCanvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        // Recortar centro donde está el precio
+        var w=ocrCanvas.width, h=ocrCanvas.height;
+        var top=Math.floor(h*0.25), bottom=Math.floor(h*0.85), left=Math.floor(w*0.05), right=Math.floor(w*0.95);
+        var cw=right-left, ch=bottom-top;
+        var tempCanvas=document.createElement('canvas');
+        tempCanvas.width=cw;
+        tempCanvas.height=ch;
+        var tctx=tempCanvas.getContext('2d');
+        tctx.drawImage(ocrCanvas, left, top, cw, ch, 0, 0, cw, ch);
+        // Preprocesar
+        var id=tctx.getImageData(0,0,cw,ch);
+        var d=id.data;
+        for(var i=0;i<d.length;i+=4){
+          var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+          var val=gray>175?255:gray<90?0:gray<125?0:255;
+          d[i]=d[i+1]=d[i+2]=val;
+        }
+        tctx.putImageData(id,0,0);
+        
+        // Mostrar preview
+        if(previewImg){ previewImg.src=tempCanvas.toDataURL(); previewImg.classList.add('show'); }
+        
+        // Detener stream
+        stream.getTracks().forEach(function(t){ t.stop(); });
+        
+        // Procesar
+        await processImageFromCanvas(tempCanvas, 'Efectivo');
+        
+      }catch(err){
+        console.error('getDisplayMedia error', err);
+        if(err.name==='NotAllowedError'){
+          showStat('❌ Cancelaste la captura', false);
+        } else {
+          showStat('⚠️ No se pudo capturar pantalla - Usá Galería', false);
+        }
+      }
+    });
+  }
+
+  // Exponer showServiceSelector global para reutilizar
+  window.showServiceSelector = window.showServiceSelector || function(amount, payment, detectedService){
+    var svcQuick=document.getElementById('svc-quick');
+    if(!svcQuick) return;
+    var services=[
+      {id:'Bolt Auto', label:'🚗 Bolt Auto'},
+      {id:'Bolt Moto', label:'🏍️ Bolt Moto'},
+      {id:'Uber Auto', label:'🚗 Uber Auto'},
+      {id:'Uber Moto', label:'🏍️ Uber Moto'}
+    ];
+    var html='';
+    services.forEach(function(s){
+      var active=s.id===detectedService;
+      html+='<button data-svc="'+s.id+'" style="padding:14px 8px;border-radius:12px;border:'+(active?'2px solid #2a5bd7':'1px solid #dbe6ff')+';background:'+(active?'#2a5bd7':'#fff')+';color:'+(active?'#fff':'#333')+';font-weight:800;font-size:12px;cursor:pointer">'+s.label+(active?' ✓':'')+'</button>';
+    });
+    svcQuick.innerHTML=html;
+    svcQuick.style.display='grid';
+    var statusEl=document.getElementById('ultra-status');
+    if(statusEl){ statusEl.textContent='📷 Detecté ₲'+amount.toLocaleString()+' '+payment+' - Tocá servicio'; statusEl.className='show ok'; statusEl.style.display='block'; }
+    svcQuick.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var svc=this.getAttribute('data-svc');
+        var amountInput=document.getElementById('trip-amount');
+        var form=document.getElementById('trip-form');
+        if(amountInput) amountInput.value=amount;
+        var svcBtn=document.querySelector('[data-service="'+svc+'"]');
+        if(svcBtn) svcBtn.click();
+        var payInput=document.getElementById('trip-payment');
+        if(payInput) payInput.value=payment;
+        document.querySelectorAll('.pay-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.payment===payment); });
+        if(window.updatePreview) try{ window.updatePreview(); }catch(e){}
+        try{ localStorage.setItem('lastService', svc); }catch(e){}
+        setTimeout(function(){ try{ form.requestSubmit(); }catch(e){ form.dispatchEvent(new Event('submit',{bubbles:true})); } if(statusEl){ statusEl.textContent='✅ Guardado: ₲'+amount.toLocaleString()+' '+payment+' - '+svc; } svcQuick.style.display='none'; }, 300);
+      });
+    });
+  };
+})();
+</script>
+
+</body></html>';
   win.document.write(htmlPdf); win.document.close(); toast('PDF gerencial listo');
 });
 
@@ -510,18 +671,25 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
 })();
 </script>
 
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-// CAPTURA AUTO - LEE MONTO + METODO DE PAGO DEL SCREENSHOT
+// CAPTURA + SERVICIO - DIFERENCIA AUTO/MOTO
 (function(){
   var camInput=document.getElementById('ultra-cam-input');
   var vozBtn=document.getElementById('ultra-voz-btn');
   var vozLabel=document.getElementById('ultra-voz-label');
-  var vozSub=document.getElementById('ultra-voz-sub');
   var statusEl=document.getElementById('ultra-status');
   var previewImg=document.getElementById('ultra-preview-img');
   var ocrCanvas=document.getElementById('ocr-canvas');
   
+  // Crear contenedor de selección rápida de servicio
+  var svcQuick=document.createElement('div');
+  svcQuick.id='svc-quick';
+  svcQuick.style.cssText='display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px';
+  svcQuick.innerHTML='';
+  if(statusEl && statusEl.parentNode) statusEl.parentNode.insertBefore(svcQuick, statusEl.nextSibling);
+
   function showStat(msg, ok){
     if(!statusEl) return;
     statusEl.textContent=msg;
@@ -529,6 +697,8 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     statusEl.style.display='block';
   }
   function hideStat(){ if(statusEl) statusEl.style.display='none'; }
+  
+  function hideSvcQuick(){ svcQuick.style.display='none'; svcQuick.innerHTML=''; }
 
   function forceSave(amount, payment, service){
     var amountInput=document.getElementById('trip-amount');
@@ -547,9 +717,33 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     if(window.updatePreview) try{ window.updatePreview(); }catch(e){}
     setTimeout(function(){
       try{ form.requestSubmit(); }catch(e){ form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})); }
-      showStat('✅ Guardado: ₲'+amount.toLocaleString()+' '+payment+' '+service, true);
+      showStat('✅ Guardado: ₲'+amount.toLocaleString()+' '+payment+' - '+service, true);
+      hideSvcQuick();
       setTimeout(function(){ hideStat(); if(previewImg) previewImg.classList.remove('show'); }, 2500);
     }, 300);
+  }
+
+  function showServiceSelector(amount, payment, detectedService){
+    var services=[
+      {id:'Bolt Auto', label:'🚗 Bolt Auto', color:'#2a5bd7'},
+      {id:'Bolt Moto', label:'🏍️ Bolt Moto', color:'#0f6b3f'},
+      {id:'Uber Auto', label:'🚗 Uber Auto', color:'#000'},
+      {id:'Uber Moto', label:'🏍️ Uber Moto', color:'#ff6b00'}
+    ];
+    var html='';
+    services.forEach(function(s){
+      var isActive = s.id===detectedService;
+      html+='<button data-svc="'+s.id+'" style="padding:14px 8px;border-radius:12px;border:'+(isActive?'2px solid '+s.color:'1px solid #dbe6ff')+';background:'+(isActive?s.color:'#fff')+';color:'+(isActive?'#fff':'#333')+';font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)">'+s.label+(isActive?' ✓':'')+'</button>';
+    });
+    svcQuick.innerHTML=html;
+    svcQuick.style.display='grid';
+    showStat('📷 Detecté ₲'+amount.toLocaleString()+' '+payment+' - Tocá el servicio para guardar', true);
+    svcQuick.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var svc=this.getAttribute('data-svc');
+        forceSave(amount, payment, svc);
+      });
+    });
   }
 
   function preprocessForOCR(file){
@@ -559,13 +753,12 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
         var img=new Image();
         img.onload=function(){
           var w=img.width, h=img.height;
-          // Recorte inteligente: Bolt muestra precio en centro (30%-70% altura)
-          var top=Math.floor(h*0.25);
-          var bottom=Math.floor(h*0.85);
-          var left=Math.floor(w*0.08);
-          var right=Math.floor(w*0.92);
+          var top=Math.floor(h*0.20);
+          var bottom=Math.floor(h*0.90);
+          var left=Math.floor(w*0.05);
+          var right=Math.floor(w*0.95);
           var cw=right-left, ch=bottom-top;
-          var maxW=1000;
+          var maxW=1100;
           var scale=Math.min(1, maxW/cw);
           ocrCanvas.width=cw*scale;
           ocrCanvas.height=ch*scale;
@@ -573,19 +766,11 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
           ctx.fillStyle='#fff';
           ctx.fillRect(0,0,ocrCanvas.width,ocrCanvas.height);
           ctx.drawImage(img, left, top, cw, ch, 0, 0, ocrCanvas.width, ocrCanvas.height);
-          // Alto contraste para texto negro sobre verde claro
           var id=ctx.getImageData(0,0,ocrCanvas.width,ocrCanvas.height);
           var d=id.data;
           for(var i=0;i<d.length;i+=4){
-            var r=d[i], g=d[i+1], b=d[i+2];
-            var gray=0.299*r+0.587*g+0.114*b;
-            // Si es fondo verde claro de Bolt (#e0f7e0 aprox) -> blanco, si es negro -> negro
-            var isGreen = g>150 && r>150 && b>150 || (g>120 && r>180 && b>180);
-            var val;
-            if(gray>175) val=255;
-            else if(gray<90) val=0;
-            else if(isGreen) val=255;
-            else val=gray<130?0:255;
+            var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+            var val=gray>175?255:gray<90?0:gray<125?0:255;
             d[i]=d[i+1]=d[i+2]=val;
           }
           ctx.putImageData(id,0,0);
@@ -599,27 +784,48 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     });
   }
 
+  function detectServiceFromText(txt, lastService){
+    var low=txt.toLowerCase();
+    // Prioridad: si el texto contiene moto
+    if(low.indexOf('moto')!==-1){
+      if(low.indexOf('uber')!==-1) return 'Uber Moto';
+      return 'Bolt Moto';
+    }
+    if(low.indexOf('uber')!==-1) return 'Uber Auto';
+    if(low.indexOf('bolt')!==-1){
+      // Si no dice moto, asumir Auto pero respetar último servicio si era Moto
+      if(lastService && lastService.indexOf('Moto')!==-1 && lastService.indexOf('Bolt')!==-1){
+        // Si último fue Bolt Moto y no hay pista, preguntar igual
+        return 'Bolt Auto';
+      }
+      return 'Bolt Auto';
+    }
+    // Fallback: usar último servicio usado (guardado en localStorage)
+    try{
+      var saved=localStorage.getItem('lastService');
+      if(saved) return saved;
+    }catch(e){}
+    if(lastService) return lastService;
+    return 'Bolt Auto';
+  }
+
   if(camInput){
     camInput.addEventListener('change', async function(e){
       var file=e.target.files[0]; if(!file) return;
       if(previewImg){ previewImg.src=URL.createObjectURL(file); previewImg.classList.add('show'); }
       showStat('📷 Leyendo captura...', true);
+      hideSvcQuick();
       try{
         if(!window.Tesseract){ throw new Error('OCR no cargado'); }
         var canvas=await preprocessForOCR(file);
-        showStat('📷 Analizando monto... 0%', true);
+        showStat('📷 Detectando monto y servicio...', true);
         var result=await Tesseract.recognize(canvas, 'eng', {
-          logger:function(m){
-            if(m.status==='recognizing text'){
-              showStat('📷 Leyendo... '+Math.round(m.progress*100)+'%', true);
-            }
-          },
-          tessedit_char_whitelist: '0123456789.,₲$G',
+          logger:function(m){ if(m.status==='recognizing text'){ showStat('📷 '+Math.round(m.progress*100)+'%', true); }},
+          tessedit_char_whitelist: '0123456789.,₲$',
           tessedit_pageseg_mode: '6'
         });
         var txt=result.data.text||'';
-        console.log('OCR TEXT:', txt);
-        // Buscar montos: 8900, 8,900, 16,900, 26,800
+        console.log('OCR:', txt);
         var amounts=[];
         var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{4,6})/g;
         var mm;
@@ -629,47 +835,34 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
           if(n>=500 && n<=200000) amounts.push(n);
         }
         amounts=[...new Set(amounts)].sort(function(a,b){return b-a;});
-        console.log('Amounts:', amounts);
-        var amount=null;
-        if(amounts.length){
-          // Si hay texto "Total", tomar el número cerca de Total
-          var totalIdx=txt.toLowerCase().indexOf('total');
-          if(totalIdx!==-1){
-            var after=txt.substring(totalIdx, totalIdx+50);
-            var mt=after.match(/([0-9]{1,3}(?:[.,][0-9]{3})*)/);
-            if(mt) amount=parseInt(mt[1].replace(/[^0-9]/g,''),10);
-          }
-          if(!amount) amount=amounts[0];
-        }
-        var lower=txt.toLowerCase();
-        // Detectar método de pago del screenshot
-        var payment='Efectivo';
-        if(lower.indexOf('tarjeta')!==-1 || lower.indexOf('card')!==-1) payment='Tarjeta';
-        else if(lower.indexOf('transfer')!==-1) payment='Transferencia';
-        else if(lower.indexOf('efectivo')!==-1 || lower.indexOf('recoge')!==-1 || lower.indexOf('recoger')!==-1 || lower.indexOf('dinero en efectivo')!==-1) payment='Efectivo';
+        var amount=amounts.length?amounts[0]:null;
+        // Total especial
+        var totalMatch=txt.match(/Total[^0-9]*([0-9]{1,3}(?:[.,][0-9]{3})*)/i);
+        if(totalMatch) amount=parseInt(totalMatch[1].replace(/[^0-9]/g,''),10);
         
-        var service='Bolt Auto';
-        if(lower.indexOf('moto')!==-1) service=lower.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
-        else if(lower.indexOf('uber')!==-1) service='Uber Auto';
-
+        var low=txt.toLowerCase();
+        var payment='Efectivo';
+        if(low.indexOf('tarjeta')!==-1) payment='Tarjeta';
+        else if(low.indexOf('transfer')!==-1) payment='Transferencia';
+        else if(low.indexOf('efectivo')!==-1 || low.indexOf('recoge')!==-1) payment='Efectivo';
+        
+        var lastSvc=null;
+        try{ lastSvc=localStorage.getItem('lastService'); }catch(e){}
+        var service=detectServiceFromText(txt, lastSvc);
+        
         if(amount){
-          showStat('✅ Detecté: ₲'+amount.toLocaleString()+' '+payment+' - Guardando...', true);
-          forceSave(amount, payment, service);
+          // Guardar último servicio para próxima vez
+          try{ localStorage.setItem('lastService', service); }catch(e){}
+          // Mostrar selector de servicio para confirmar Auto/Moto (requisito del usuario)
+          showServiceSelector(amount, payment, service);
         } else {
-          // Fallback: si no leyó monto pero imagen es clara (como 8900), abrir modal para que confirme rápido
-          showStat('⚠️ No pude leer el monto, pero detecté '+payment+' - Ingresá el monto', false);
+          showStat('⚠️ No leí monto, ingresá manual - Detecté '+payment, false);
           var modal=document.getElementById('trip-modal');
           if(modal) modal.classList.add('open');
-          var ai=document.getElementById('trip-amount');
-          if(ai) setTimeout(function(){ ai.focus(); }, 300);
-          if(window.selectService) try{ selectService(service); }catch(e){}
-          document.querySelectorAll('.pay-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.payment===payment); });
-          var payInput=document.getElementById('trip-payment');
-          if(payInput) payInput.value=payment;
         }
       }catch(err){
-        console.error('OCR Error', err);
-        showStat('📷 Foto lista - Ingresá el monto manual (OCR: '+(err.message||'error')+')', false);
+        console.error(err);
+        showStat('📷 Foto lista - Ingresá monto manual', false);
         var modal=document.getElementById('trip-modal');
         if(modal) modal.classList.add('open');
       }
@@ -677,19 +870,14 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     });
   }
 
-  // VOZ - YA FUNCIONA, guardado auto
+  // VOZ con servicio Auto/Moto
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   var rec=null; var listening=false;
   var wordMap={'cero':0,'uno':1,'una':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,'diecisiete':17,'dieciocho':18,'diecinueve':19,'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,'veintitres':23,'veintitrés':23,'veinticuatro':24,'veinticinco':25,'veintiseis':26,'veintiséis':26,'veintisiete':27,'veintiocho':28,'veintinueve':29,'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,'cien':100};
   function wordsToNumber(text){
     var low=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     var m=low.match(/(cero|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien)[ ]*(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)?[ ]*mil/);
-    if(m){
-      var base=wordMap[m[1]]||0;
-      var extra=m[2]?wordMap[m[2]]||0:0;
-      var total=base+extra;
-      if(total>0) return total*1000;
-    }
+    if(m){ var base=wordMap[m[1]]||0; var extra=m[2]?wordMap[m[2]]||0:0; var total=base+extra; if(total>0) return total*1000; }
     for(var k in wordMap){ if(low.indexOf(k+' mil')!==-1) return wordMap[k]*1000; }
     for(var k in wordMap){ if(low.trim()===k || low.indexOf(' '+k+' ')!==-1){ var v=wordMap[k]; if(v>=1 && v<=100) return v*1000; } }
     return null;
@@ -711,8 +899,9 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     if(low.indexOf('tarjeta')!==-1) pay='Tarjeta';
     else if(low.indexOf('transfer')!==-1) pay='Transferencia';
     var serv='Bolt Auto';
-    if(low.indexOf('moto')!==-1) serv=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
-    else if(low.indexOf('uber')!==-1) serv='Uber Auto';
+    if(low.indexOf('moto')!==-1){ serv=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto'; }
+    else if(low.indexOf('uber')!==-1){ serv='Uber Auto'; }
+    else if(low.indexOf('bolt')!==-1){ serv=low.indexOf('moto')!==-1?'Bolt Moto':'Bolt Auto'; }
     return {amount:amt,payment:pay,service:serv,raw:t};
   }
   if(vozBtn){
@@ -721,17 +910,19 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
       if(listening&&rec){ try{ rec.stop(); }catch(e){} return; }
       rec=new SR();
       rec.lang='es-ES';
-      rec.onstart=function(){ listening=true; if(vozLabel) vozLabel.textContent='Escuchando...'; showStat('🎤 Decí: "veinte mil efectivo"', true); };
+      rec.onstart=function(){ listening=true; if(vozLabel) vozLabel.textContent='Escuchando...'; showStat('🎤 Decí: "veinte mil efectivo moto"', true); };
       rec.onend=function(){ listening=false; if(vozLabel) vozLabel.textContent='Voz'; };
       rec.onerror=function(e){ listening=false; if(vozLabel) vozLabel.textContent='Voz'; showStat('❌ Voz: '+e.error, false); };
       rec.onresult=function(e){
         var tr=e.results[0][0].transcript;
         var p=parseVoice(tr);
         if(p.amount){
-          showStat('🎤 "'+tr+'" → ₲'+p.amount.toLocaleString()+' '+p.payment+' - Guardando...', true);
-          forceSave(p.amount, p.payment, p.service);
+          try{ localStorage.setItem('lastService', p.service); }catch(e){}
+          showStat('🎤 "'+tr+'" → ₲'+p.amount.toLocaleString()+' '+p.payment+' '+p.service, true);
+          // Mostrar selector de servicio también para voz
+          showServiceSelector(p.amount, p.payment, p.service);
         } else {
-          showStat('🎤 "'+tr+'" - no detecté monto. Probá "veinte mil"', false);
+          showStat('🎤 "'+tr+'" - no detecté monto. Probá "veinte mil moto"', false);
         }
       };
       try{ rec.start(); }catch(err){ showStat('❌ '+err.message, false); }
