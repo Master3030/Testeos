@@ -433,7 +433,83 @@ $('download-report-pdf')?.addEventListener('click', ()=>{
   var expRows=''; fExp.slice().reverse().forEach(function(x){ expRows+='<tr><td>'+x.date+'</td><td>'+x.type+'</td><td>'+money(x.amount)+'</td><td>'+(x.comment||'—')+'</td></tr>'; });
   var servRows=''; Object.keys(byServ).forEach(function(s){ servRows+='<tr><td><span class="badge">'+s+'</span></td><td>'+money(byServ[s])+'</td></tr>'; });
   var win=window.open('', '_blank'); if(!win){ toast('Permite ventanas emergentes'); return; }
-  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Periodo: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' - Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Metodo de Pago</h2><table class="table"><tr><th>Metodo</th><th>Monto</th><th>%</th></tr><tr><td>Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Dia</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoria</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script></body></html>';
+  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Periodo: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' - Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Metodo de Pago</h2><table class="table"><tr><th>Metodo</th><th>Monto</th><th>%</th></tr><tr><td>Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Dia</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoria</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script>
+<script>
+(function(){
+  function initTripSteps(){
+    var nextBtn=document.getElementById('trip-next-btn');
+    var backBtn=document.getElementById('trip-back-btn');
+    var step1=document.getElementById('trip-step-1');
+    var step2=document.getElementById('trip-step-2');
+    var tripForm=document.getElementById('trip-form');
+    var payOpts=document.querySelectorAll('.pay-opt');
+    var payInput=document.getElementById('trip-payment');
+    if(!nextBtn||!step1||!step2) return;
+    if(nextBtn.dataset.bound==='1') return;
+    nextBtn.dataset.bound='1';
+    // Payment selection
+    payOpts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        payOpts.forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        if(payInput) payInput.value=this.dataset.payment||'Efectivo';
+        if(typeof updatePreview==='function') try{ updatePreview(); }catch(e){}
+      });
+    });
+    nextBtn.addEventListener('click', function(){
+      var amountEl=document.getElementById('trip-amount');
+      var dateEl=document.getElementById('trip-date');
+      var commEl=document.getElementById('trip-commission');
+      var amount=Number(amountEl?amountEl.value:0);
+      if(!dateEl||!dateEl.value){
+        var d=new Date(); var ts=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        if(dateEl) dateEl.value=ts;
+      }
+      if(!amount||amount<=0){
+        if(amountEl) amountEl.focus();
+        if(typeof toast==='function') toast('Ingresa el monto bruto');
+        return;
+      }
+      if(step1) step1.classList.add('hidden');
+      if(step2) step2.classList.remove('hidden');
+    });
+    if(backBtn){
+      backBtn.addEventListener('click', function(){
+        if(step2) step2.classList.add('hidden');
+        if(step1) step1.classList.remove('hidden');
+      });
+    }
+    // Reset steps when opening modal
+    var openBtn=document.getElementById('open-trip-modal');
+    if(openBtn){
+      openBtn.addEventListener('click', function(){
+        setTimeout(function(){
+          if(step2) step2.classList.add('hidden');
+          if(step1) step1.classList.remove('hidden');
+          var d=new Date(); var ts=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          var dateEl=document.getElementById('trip-date');
+          if(dateEl && !dateEl.value) dateEl.value=ts;
+        }, 80);
+      });
+    }
+    // Enter key on amount -> go to step2
+    var amountEl=document.getElementById('trip-amount');
+    if(amountEl){
+      amountEl.addEventListener('keydown', function(e){
+        if(e.key==='Enter'){
+          e.preventDefault();
+          nextBtn.click();
+        }
+      });
+    }
+  }
+  document.addEventListener('DOMContentLoaded', initTripSteps);
+  setTimeout(initTripSteps, 500);
+  setTimeout(initTripSteps, 1500);
+})();
+</script>
+
+</body></html>';
   win.document.write(htmlPdf); win.document.close(); toast('PDF gerencial listo')
 });
 
@@ -740,5 +816,81 @@ init();
   if(execOverlay){ execOverlay.addEventListener('click', function(e){ if(e.target===execOverlay) execOverlay.classList.remove('open'); }); }
 })();
 </script>
+
+<script>
+(function(){
+  function initTripSteps(){
+    var nextBtn=document.getElementById('trip-next-btn');
+    var backBtn=document.getElementById('trip-back-btn');
+    var step1=document.getElementById('trip-step-1');
+    var step2=document.getElementById('trip-step-2');
+    var tripForm=document.getElementById('trip-form');
+    var payOpts=document.querySelectorAll('.pay-opt');
+    var payInput=document.getElementById('trip-payment');
+    if(!nextBtn||!step1||!step2) return;
+    if(nextBtn.dataset.bound==='1') return;
+    nextBtn.dataset.bound='1';
+    // Payment selection
+    payOpts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        payOpts.forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        if(payInput) payInput.value=this.dataset.payment||'Efectivo';
+        if(typeof updatePreview==='function') try{ updatePreview(); }catch(e){}
+      });
+    });
+    nextBtn.addEventListener('click', function(){
+      var amountEl=document.getElementById('trip-amount');
+      var dateEl=document.getElementById('trip-date');
+      var commEl=document.getElementById('trip-commission');
+      var amount=Number(amountEl?amountEl.value:0);
+      if(!dateEl||!dateEl.value){
+        var d=new Date(); var ts=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        if(dateEl) dateEl.value=ts;
+      }
+      if(!amount||amount<=0){
+        if(amountEl) amountEl.focus();
+        if(typeof toast==='function') toast('Ingresa el monto bruto');
+        return;
+      }
+      if(step1) step1.classList.add('hidden');
+      if(step2) step2.classList.remove('hidden');
+    });
+    if(backBtn){
+      backBtn.addEventListener('click', function(){
+        if(step2) step2.classList.add('hidden');
+        if(step1) step1.classList.remove('hidden');
+      });
+    }
+    // Reset steps when opening modal
+    var openBtn=document.getElementById('open-trip-modal');
+    if(openBtn){
+      openBtn.addEventListener('click', function(){
+        setTimeout(function(){
+          if(step2) step2.classList.add('hidden');
+          if(step1) step1.classList.remove('hidden');
+          var d=new Date(); var ts=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          var dateEl=document.getElementById('trip-date');
+          if(dateEl && !dateEl.value) dateEl.value=ts;
+        }, 80);
+      });
+    }
+    // Enter key on amount -> go to step2
+    var amountEl=document.getElementById('trip-amount');
+    if(amountEl){
+      amountEl.addEventListener('keydown', function(e){
+        if(e.key==='Enter'){
+          e.preventDefault();
+          nextBtn.click();
+        }
+      });
+    }
+  }
+  document.addEventListener('DOMContentLoaded', initTripSteps);
+  setTimeout(initTripSteps, 500);
+  setTimeout(initTripSteps, 1500);
+})();
+</script>
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
