@@ -1,27 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
@@ -137,7 +116,6 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 .n1-card.cam{background:#fff;color:#2a5bd7;border:2px solid #b9c7e8}
 .n1-card.inst{background:linear-gradient(135deg,#101827,#2a5bd7);color:#fff}
 .n1-card.voz{background:#0f6b3f;color:#fff}
-.n1-card:active{transform:scale(.96)}
 #ultra-status{margin-top:10px;padding:12px;border-radius:12px;font-size:13px;font-weight:700;text-align:center;display:none}
 #ultra-status.show{display:block}
 #ultra-status.ok{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
@@ -166,6 +144,9 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 .table td{padding:8px 10px;border-top:1px solid #eef1f6}
 @media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
 
+
+.nivel1-wrap{display:none!important}
+@media(max-width:480px){.trip-modal-box{width:100%;max-height:92dvh;padding:16px}.modal{padding:8px;align-items:flex-end}.modal-box{border-radius:20px 20px 14px 14px}}
 </style>
 </head>
 <body>
@@ -201,22 +182,14 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
         <div class="card trip-launch-card">
           <div class="card-head"><div><h2>Viajes</h2><p>Registra cada viaje en pocos segundos.</p></div></div>
           
-<div class="nivel1-wrap">
-  <div class="nivel1-title"><span>⚡ Registro rápido - Auto / Moto</span><span style="font-size:10px;opacity:.7">voz mejorada</span></div>
-  <div class="nivel1-grid3">
-    <button class="n1-card inst" id="instant-capture-btn"><span style="font-size:22px">⚡</span>Instantánea<small>Captura pantalla</small></button>
-    <label class="n1-card cam" for="ultra-cam-input"><span style="font-size:22px">📷</span>Galería<small>Foto Bolt</small></label>
-    <button class="n1-card voz" id="ultra-voz-btn"><span style="font-size:22px">🎤</span><span id="ultra-voz-label">Voz</span><small>Veinte mil</small></button>
-  </div>
-  <input type="file" id="ultra-cam-input" accept="image/*" capture="environment" style="display:none">
-  <div id="ultra-status"></div>
-  <img id="ultra-preview-img" alt="preview">
-  <div id="svc-quick"></div>
-  <canvas id="ocr-canvas" style="display:none"></canvas>
-</div>
 <button class="btn primary full trip-open-btn" type="button" id="open-trip-modal">＋ Agregar viaje</button>
-
-          <p class="hint" style="margin-top:10px">Elige el servicio, ingresa el importe y guarda. La ganancia se calcula automáticamente.</p>
+          <div class="quick-capture" style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
+            <button class="btn" type="button" id="voice-capture">🎙️ Cargar por voz</button>
+            <button class="btn" type="button" id="ocr-capture">📷 Leer comprobante</button>
+          </div>
+          <input id="ocr-file" type="file" accept="image/*" capture="environment" class="hidden">
+          <p class="hint" id="capture-status" role="status" aria-live="polite" style="margin-top:10px;min-height:18px">Voz: “25 mil Bolt Moto efectivo”. OCR: selecciona una captura o foto del comprobante.</p>
+          <p class="hint" style="margin-top:10px">La carga inteligente completa los datos; siempre podrás revisarlos antes de guardar.</p>
         </div>
         <div class="hidden" aria-hidden="true">
           <form id="trip-form">
@@ -294,6 +267,7 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
         <div class="periods"><button class="period active" data-period="day">Hoy</button><button class="period" data-period="week">Últimos 7 días</button><button class="period" data-period="month">Este mes</button><button class="period" data-period="all">Todo el período</button></div>
         <div class="summary-grid"><div class="summary-tile"><span>Ingresos netos</span><strong id="summary-income">₲ 0</strong></div><div class="summary-tile"><span>Gastos</span><strong id="summary-expenses">₲ 0</strong></div><div class="summary-tile"><span>Ganancia final</span><strong id="summary-net">₲ 0</strong></div></div>
       </div>
+      <div class="card hidden" id="executive-report" aria-live="polite"><div class="card-head"><div><h2>Informe ejecutivo</h2><p>Indicadores calculados directamente desde tus registros y el período seleccionado.</p></div><button class="btn" type="button" id="close-executive">Cerrar</button></div><div class="summary-grid"><div class="summary-tile"><span>Ingresos netos</span><strong id="exec-income">₲ 0</strong></div><div class="summary-tile"><span>Gastos totales</span><strong id="exec-expenses">₲ 0</strong></div><div class="summary-tile"><span>Resultado</span><strong id="exec-balance">₲ 0</strong></div><div class="summary-tile"><span>Viajes / promedio</span><strong id="exec-trips">0</strong></div><div class="summary-tile"><span>Comisiones</span><strong id="exec-commission">₲ 0</strong></div><div class="summary-tile"><span>Gasto por viaje</span><strong id="exec-cost-trip">₲ 0</strong></div></div><p id="exec-insight" class="notice" style="margin-top:14px;margin-bottom:0"></p></div>
       <div class="card"><div class="card-head"><div><h2>Balance por día</h2><p>Ingresos netos menos gastos registrados cada día.</p></div></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Ingresos netos</th><th>Gastos</th><th>Resultado</th></tr></thead><tbody id="daily-summary-body"></tbody></table></div></div>
       <div class="card" id="report-card"><div class="report-head"><h3>Informe financiero</h3><p id="report-date"></p></div><div class="summary-grid" style="margin-bottom:18px"><div class="summary-tile"><span>Viajes registrados</span><strong id="report-trips">0</strong></div><div class="summary-tile"><span>Gastos registrados</span><strong id="report-expense-count">0</strong></div><div class="summary-tile"><span>Ganancia acumulada</span><strong id="report-net">₲ 0</strong></div></div><h3>Detalle de viajes</h3><div class="table-wrap" style="margin-bottom:18px"><table><thead><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr></thead><tbody id="report-trips-body"></tbody></table></div><h3>Detalle de gastos</h3><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr></thead><tbody id="report-expenses-body"></tbody></table></div></div>
       <div class="card no-print"><h2>Administrar datos</h2><p class="hint" style="margin:8px 0 15px">Los datos se guardan en este navegador. Exporta una copia de seguridad regularmente, especialmente antes de borrar datos o cambiar de dispositivo.</p><button class="btn danger" id="delete-all">Borrar todos los datos</button></div>
@@ -312,510 +286,128 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 <div class="modal" id="confirm-modal"><div class="modal-box"><div class="modal-head"><h2 id="confirm-title">Confirmar acción</h2><button class="close" data-close="confirm-modal">×</button></div><p id="confirm-message">¿Deseas continuar?</p><div class="modal-actions"><button class="btn" data-close="confirm-modal">Cancelar</button><button class="btn danger" id="confirm-action">Confirmar</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
-(() => {
+(()=>{
 'use strict';
-const KEY='ruta_finanzas_v1';
-const THEME_KEY='ruta_finanzas_theme';
-const $=id=>document.getElementById(id);
+const KEY='ruta_finanzas_v1', THEME_KEY='ruta_finanzas_theme';
+const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
 const money=n=>'₲ '+Math.round(Number(n)||0).toLocaleString('es-PY');
 const num=n=>Math.round(Number(n)||0).toLocaleString('es-PY');
-const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const defaults=()=>({trips:[],expenses:[],goal:0,commission:{'Bolt Auto':25,'Bolt Moto':20},bonus:{count:0,target:null,amount:null,claimed:false},selectedService:'Bolt Auto',cash:{},createdAt:new Date().toISOString()});
-let state=load(), selectedService=state.selectedService||'Bolt Auto', summaryPeriod='day', confirmCallback=null;
+const defaults=()=>({trips:[],expenses:[],goal:0,commission:{'Bolt Auto':25,'Bolt Moto':20},bonus:{count:0,target:null,amount:null,claimed:false},selectedService:'Bolt Auto',cash:{},theme:'dark',createdAt:new Date().toISOString()});
+function normalize(raw){const d=defaults(),x=raw&&typeof raw==='object'?raw:{};return {...d,...x,trips:Array.isArray(x.trips)?x.trips:[],expenses:Array.isArray(x.expenses)?x.expenses:[],commission:{...d.commission,...(x.commission||{})},bonus:{...d.bonus,...(x.bonus||{})},cash:{...(x.cash||{})}}}
+function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)||'null'))}catch{return defaults()}}
+let state=load(),selectedService=state.selectedService||'Bolt Auto',summaryPeriod='day',confirmCallback=null;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));window.__APP_STATE=state}catch(e){toast('No se pudo guardar: almacenamiento lleno o bloqueado.')}}
+function toast(msg){const el=$('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2400)}
+function ask(title,message,fn){$('confirm-title').textContent=title;$('confirm-message').textContent=message;confirmCallback=fn;$('confirm-modal').classList.add('show')}
+function closeModal(id){$(id)?.classList.remove('show')}
+function openTripModal(){$('trip-modal').classList.add('show');document.body.style.overflow='hidden';setTimeout(()=>$('trip-amount').focus(),80)}
+function closeTripModal(){closeModal('trip-modal');document.body.style.overflow=''}
 const tripForm=$('trip-form');$('trip-form-mount').appendChild(tripForm);
-function openTripModal(){ $('trip-modal').classList.add('show'); setTimeout(()=> $('trip-amount').focus(),80); }
-function closeTripModal(){ $('trip-modal').classList.remove('show'); }
 $('open-trip-modal').addEventListener('click',openTripModal);
-document.querySelectorAll('[data-close="trip-modal"]').forEach(b=>b.addEventListener('click',closeTripModal));
+$$('[data-close="trip-modal"]').forEach(b=>b.addEventListener('click',closeTripModal));
 $('trip-modal').addEventListener('click',e=>{if(e.target===$('trip-modal'))closeTripModal()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTripModal()});
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s==='object'?{...defaults(),...s,commission:{...defaults().commission,...s.commission},bonus:{...defaults().bonus,...s.bonus}}:defaults()}catch{return defaults()}}
-function save(){localStorage.setItem(KEY,JSON.stringify(state)); try{ window.__APP_STATE=state; }catch(e){} }
-function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
-function ask(title,message,callback){$('confirm-title').textContent=title;$('confirm-message').textContent=message;confirmCallback=callback;$('confirm-modal').classList.add('show')}
-document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.close).classList.remove('show')));
-$('confirm-action').addEventListener('click',()=>{ $('confirm-modal').classList.remove('show');if(confirmCallback)confirmCallback();confirmCallback=null });
-$('confirm-modal').addEventListener('click',e=>{if(e.target===$('confirm-modal'))$('confirm-modal').classList.remove('show')});
-function switchPage(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===name));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));if(name==='resumen')renderSummary()}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
-function localDate(d=today()){return d}
-function tripIncome(t){return Number(t.net)||0}
-function expenseTotal(list){return list.reduce((s,x)=>s+(Number(x.amount)||0),0)}
-function incomeTotal(list){return list.reduce((s,x)=>s+tripIncome(x),0)}
-function tripsToday(){return state.trips.filter(t=>t.date===today())}
-function expensesToday(){return state.expenses.filter(e=>e.date===today())}
-function todayNet(){return incomeTotal(tripsToday())-expenseTotal(expensesToday())}
-function safeDate(s){const [y,m,d]=String(s||'').split('-').map(Number);return y&&m&&d?new Date(y,m-1,d):new Date(0)}
-function rowEmpty(cols,msg){return `<tr><td colspan="${cols}" class="empty"><b>${esc(msg)}</b>Los registros aparecerán aquí.</td></tr>`}
-function renderTrips(){const filter=$('trip-filter').value,query=($('trip-search')?.value||'').trim().toLowerCase();const list=[...state.trips].reverse().filter(t=>(!filter||t.service===filter)&&(!query||[t.date,t.service,t.payment,t.comment].some(v=>String(v||'').toLowerCase().includes(query))));$('trip-count-label').textContent=`${state.trips.length} ${state.trips.length===1?'viaje registrado':'viajes registrados'}`;$('trips-body').innerHTML=list.length?list.map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.service)}</td><td>${t.gross==null?'—':num(t.gross)}</td><td>${esc(t.payment||'—')}</td><td class="money positive">${num(t.net)}</td><td><button class="delete" data-delete-trip="${esc(t.id)}">Eliminar</button></td></tr>`).join(''):rowEmpty(6,'Todavía no hay viajes');$('report-trips-body').innerHTML=[...state.trips].reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.service)}</td><td>${t.gross==null?'—':num(t.gross)}</td><td>${esc(t.payment||'—')}</td><td>${num(t.net)}</td><td>${esc(t.comment||'—')}</td></tr>`).join('')||rowEmpty(6,'Sin viajes')}
-function renderExpenses(){const list=[...state.expenses].reverse();$('expense-count-label').textContent=`${state.expenses.length} ${state.expenses.length===1?'gasto registrado':'gastos registrados'}`;$('expenses-body').innerHTML=list.map(e=>`<tr><td>${esc(e.date)}</td><td>${esc(e.type)}</td><td class="money negative">${num(e.amount)}</td><td>${esc(e.comment||'—')}</td><td><button class="delete" data-delete-expense="${esc(e.id)}">Eliminar</button></td></tr>`).join('')||rowEmpty(5,'Todavía no hay gastos');$('report-expenses-body').innerHTML=list.map(e=>`<tr><td>${esc(e.date)}</td><td>${esc(e.type)}</td><td>${num(e.amount)}</td><td>${esc(e.comment||'—')}</td></tr>`).join('')||rowEmpty(4,'Sin gastos')}
-document.addEventListener('click',e=>{const tb=e.target.closest('[data-delete-trip]');if(tb)ask('Eliminar viaje','Este viaje se eliminará del registro. ¿Continuar?',()=>{const i=state.trips.findIndex(t=>t.id===tb.dataset.deleteTrip);if(i>=0){const t=state.trips[i];state.trips.splice(i,1);if(t.service.startsWith('Bolt')&&!state.bonus.claimed)state.bonus.count=Math.max(0,state.bonus.count-1);save();renderAll();toast('Viaje eliminado')}});const eb=e.target.closest('[data-delete-expense]');if(eb)ask('Eliminar gasto','Este gasto se eliminará del registro. ¿Continuar?',()=>{state.expenses=state.expenses.filter(x=>x.id!==eb.dataset.deleteExpense);save();renderAll();toast('Gasto eliminado')})});
-function updatePreview(){
-  const amount=Number($('trip-amount').value)||0;
-  const commission=selectedService.startsWith('Bolt')?Math.min(100,Math.max(0,Number($('trip-commission').value)||0)):0;
-  const paymentEl = $('trip-payment');
-  const payment = paymentEl ? paymentEl.value : 'Efectivo';
-  const isCard = payment.toLowerCase().includes('tarjeta');
-  let net, gross, commissionMoney, label;
-  if(!selectedService.startsWith('Bolt')){
-    net = Math.round(amount);
-    label = `Ganancia estimada: ${money(net)} · Se registra como monto neto`;
-  } else if(isCard){
-    net = Math.round(amount);
-    if(commission >= 100 || commission <= 0) gross = net;
-    else gross = Math.round(net / (1 - commission/100));
-    commissionMoney = Math.max(0, gross - net);
-    label = `💳 Tarjeta · Ganancia directa: ${money(net)} · Bruto calc: ${money(gross)} · Comisión: ${money(commissionMoney)}`;
-  } else {
-    gross = Math.round(amount);
-    net = Math.round(amount * (1 - commission/100));
-    commissionMoney = Math.round(amount - net);
-    label = `Ganancia estimada: ${money(net)} · Comisión: ${money(commissionMoney)}`;
-  }
-  const p = $('trip-preview'); if(p) p.textContent = label;
-  const p1 = $('trip-preview-step1'); if(p1) p1.textContent = label;
-  const hint = $('card-hint'); if(hint) hint.style.display = isCard ? 'block' : 'none';
-  const amountLabel = $('amount-label');
-  if(amountLabel){
-    if(isCard && selectedService.startsWith('Bolt')) amountLabel.textContent = 'Monto neto recibido (lo que te pagó Bolt) (₲)';
-    else amountLabel.textContent = selectedService.startsWith('Bolt') ? 'Monto bruto del viaje (₲)' : 'Monto neto recibido (₲)';
-  }
-}
-function selectService(service){selectedService=service;state.selectedService=service;document.querySelectorAll('.service').forEach(b=>b.classList.toggle('active',b.dataset.service===service));const bolt=service.startsWith('Bolt');$('commission-field').classList.toggle('hidden',!bolt);$('amount-label').textContent=bolt?'Monto bruto del viaje (₲)':'Monto neto recibido (₲)';$('trip-commission').value=state.commission[service]??0;updatePreview();save()}
-document.querySelectorAll('.service').forEach(b=>b.addEventListener('click',()=>selectService(b.dataset.service)));
-$('trip-amount').addEventListener('input',updatePreview);$('trip-commission').addEventListener('input',updatePreview);
-$('trip-form').addEventListener('submit',e=>{
-  e.preventDefault();
-  const amount=Number($('trip-amount').value);
-  const comm=selectedService.startsWith('Bolt')?Number($('trip-commission').value):0;
-  if(!Number.isFinite(amount)||amount<=0||!Number.isFinite(comm)||comm<0||comm>100){toast('Revisa el monto y el porcentaje de comisión.');return}
-  const paymentVal = $('trip-payment').value;
-  const isCard = paymentVal.toLowerCase().includes('tarjeta');
-  let net, gross;
-  if(!selectedService.startsWith('Bolt')){ net = Math.round(amount); gross = null; }
-  else if(isCard){ net = Math.round(amount); if(comm>=100||comm<=0) gross = net; else gross = Math.round(net / (1 - comm/100)); }
-  else { gross = Math.round(amount); net = Math.round(amount * (1 - comm/100)); }
-  const tripDate=$('trip-date').value||today();
-  const t={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),date:tripDate,service:selectedService,gross:gross,commission:comm,payment:paymentVal,net,comment:$('trip-comment').value.trim()};
-  state.trips.push(t);
-  if(selectedService.startsWith('Bolt')&&!state.bonus.claimed)state.bonus.count++;
-  save();checkBonus();$('trip-amount').value='';$('trip-comment').value='';$('trip-comment').closest('details').open=false;$('trip-date').value=today();renderAll();updatePreview();closeTripModal();toast('Viaje agregado correctamente')});
-$('trip-filter').addEventListener('change',renderTrips);$('trip-search').addEventListener('input',renderTrips);$('clear-trip-filter').addEventListener('click',()=>{$('trip-filter').value='';renderTrips()});
-$('expense-form').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('expense-amount').value);if(!Number.isFinite(amount)||amount<=0){toast('Ingresa un monto de gasto válido.');return}state.expenses.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),date:$('expense-date').value||today(),type:$('expense-type').value,amount:Math.round(amount),comment:$('expense-comment').value.trim()});save();$('expense-amount').value='';$('expense-comment').value='';$('expense-date').value=today();renderAll();toast('Gasto agregado correctamente')});
-function renderHero(){const net=todayNet(),income=incomeTotal(tripsToday()),expense=expenseTotal(expensesToday()),all=incomeTotal(state.trips)-expenseTotal(state.expenses);const todayBalance = income - expense;$('hero-net').textContent=money(net);$('hero-sub').textContent=net>=0?'Buen trabajo. Sigue registrando cada movimiento.':'Tus gastos de hoy superan tus ingresos netos.';$('stat-income').textContent=money(income);$('stat-expenses').textContent=money(expense);$('stat-trips').textContent=tripsToday().length;$('stat-total').textContent=money(todayBalance);$('hero-goal').textContent=state.goal>0?money(state.goal):'Sin definir';const pct=state.goal>0?Math.max(0,Math.min(100,net/state.goal*100)):0;$('goal-fill').style.width=pct+'%';$('goal-percent').textContent=Math.round(pct)+'%';$('goal-progress-label').textContent=state.goal>0?`${money(Math.max(0,state.goal-net))} para alcanzar la meta`:'Configura una meta diaria para ver tu progreso';const payments=tripsToday();$('cash-transfer-total').textContent=money(incomeTotal(payments.filter(t=>t.payment==='Efectivo'||t.payment==='Transferencia')));$('card-total').textContent=money(incomeTotal(payments.filter(t=>t.payment==='Tarjeta')));$('commission-total').textContent=money(payments.reduce((s,t)=>s+Math.max(0,(Number(t.gross)||0)-(Number(t.net)||0)),0))}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTripModal();closeModal('confirm-modal')}});
+$$('[data-close="confirm-modal"]').forEach(b=>b.addEventListener('click',()=>closeModal('confirm-modal')));
+$('confirm-modal').addEventListener('click',e=>{if(e.target===$('confirm-modal'))closeModal('confirm-modal')});
+$('confirm-action').addEventListener('click',()=>{closeModal('confirm-modal');const fn=confirmCallback;confirmCallback=null;if(fn)fn()});
+function switchPage(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));if(name==='resumen')renderSummary();window.scrollTo({top:0,behavior:'smooth'})}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+function income(t){return Number(t.net)||0} function totalIncome(a){return a.reduce((s,t)=>s+income(t),0)} function totalExpenses(a){return a.reduce((s,x)=>s+(Number(x.amount)||0),0)}
+function tripsToday(){return state.trips.filter(t=>t.date===today())}function expensesToday(){return state.expenses.filter(x=>x.date===today())}
+function emptyRow(n,msg){return `<tr><td colspan="${n}" class="empty"><b>${esc(msg)}</b></td></tr>`}
+function renderTrips(){const filter=$('trip-filter').value,q=($('trip-search').value||'').trim().toLowerCase();const list=state.trips.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'' )).filter(t=>(!filter||t.service===filter)&&(!q||[t.date,t.service,t.payment,t.comment,t.gross,t.net].join(' ').toLowerCase().includes(q)));$('trip-count-label').textContent=`${state.trips.length} ${state.trips.length===1?'viaje registrado':'viajes registrados'}`;$('trips-body').innerHTML=list.map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.service)}</td><td>${t.gross==null?'—':num(t.gross)}</td><td>${esc(t.payment||'—')}</td><td class="money positive">${num(t.net)}</td><td><button class="delete" data-delete-trip="${esc(t.id)}">Eliminar</button></td></tr>`).join('')||emptyRow(6,'Todavía no hay viajes');$('report-trips-body').innerHTML=state.trips.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.service)}</td><td>${t.gross==null?'—':num(t.gross)}</td><td>${esc(t.payment||'—')}</td><td>${num(t.net)}</td><td>${esc(t.comment||'—')}</td></tr>`).join('')||emptyRow(6,'Sin viajes')}
+function renderExpenses(){const list=state.expenses.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('expense-count-label').textContent=`${list.length} ${list.length===1?'gasto registrado':'gastos registrados'}`;$('expenses-body').innerHTML=list.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td class="money negative">${num(x.amount)}</td><td>${esc(x.comment||'—')}</td><td><button class="delete" data-delete-expense="${esc(x.id)}">Eliminar</button></td></tr>`).join('')||emptyRow(5,'Todavía no hay gastos');$('report-expenses-body').innerHTML=list.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td>${num(x.amount)}</td><td>${esc(x.comment||'—')}</td></tr>`).join('')||emptyRow(4,'Sin gastos')}
+function renderHero(){const ts=tripsToday(),es=expensesToday(),inc=totalIncome(ts),exp=totalExpenses(es),net=inc-exp,goal=Math.max(0,Number(state.goal)||0),pct=goal?Math.max(0,Math.min(100,net/goal*100)):0;$('hero-net').textContent=money(net);$('hero-sub').textContent=net>=0?'Este es tu resultado de hoy después de comisiones y gastos.':'Tus gastos de hoy superan tus ingresos netos.';$('stat-income').textContent=money(inc);$('stat-expenses').textContent=money(exp);$('stat-trips').textContent=ts.length;$('stat-total').textContent=money(net);$('hero-goal').textContent=goal?money(goal):'Sin definir';$('goal-fill').style.width=pct+'%';$('goal-percent').textContent=Math.round(pct)+'%';$('goal-progress-label').textContent=goal?money(Math.max(0,goal-net))+' para alcanzar la meta':'Configura una meta diaria para ver tu progreso';$('cash-transfer-total').textContent=money(totalIncome(ts.filter(t=>t.payment==='Efectivo'||t.payment==='Transferencia')));$('card-total').textContent=money(totalIncome(ts.filter(t=>t.payment==='Tarjeta')));$('commission-total').textContent=money(ts.reduce((s,t)=>s+Math.max(0,(Number(t.gross)||0)-(Number(t.net)||0)),0));}
+function renderBonus(){const b=state.bonus,target=Number(b.target)||0,count=Number(b.count)||0,amount=Number(b.amount)||0;$('bonus-amount-display').textContent=amount?money(amount):'₲ 0';$('bonus-status').textContent=b.claimed?'Bono reclamado':target&&count>=target?'¡Meta alcanzada!':target?'En progreso':'Sin configurar';$('bonus-fill').style.width=(target?Math.min(100,count/target*100):0)+'%';$('bonus-progress-text').textContent=target?`${count} de ${target} viajes · ${Math.max(0,target-count)} restantes`:'Configura una meta de viajes para comenzar.';$('bonus-trip-goal').value=target||'';$('bonus-amount').value=amount||''}
 const denominations=[100000,50000,20000,10000,5000,2000,1000,500,100,50];
-function renderCashFields(){ $('denominations').innerHTML=denominations.map(d=>`<div class="denom"><label for="denom-${d}">₲ ${num(d)}</label><input type="number" id="denom-${d}" min="0" step="1" value="${Number(state.cash[d])||0}" inputmode="numeric" aria-label="Cantidad de billetes o monedas de ${d}"></div>`).join('');$('denominations').addEventListener('input',cashInput)}
-function cashInput(e){if(!e.target.id.startsWith('denom-'))return;const d=e.target.id.slice(6),v=Math.max(0,Math.floor(Number(e.target.value)||0));state.cash[d]=v;save();updateCashTotal()}
+function renderCashFields(){$('denominations').innerHTML=denominations.map(d=>`<div class="denom"><label for="denom-${d}">₲ ${num(d)}</label><input type="number" id="denom-${d}" min="0" step="1" value="${Math.max(0,Number(state.cash[d])||0)}" inputmode="numeric"></div>`).join('');updateCashTotal()}
 function updateCashTotal(){$('cash-total').textContent=money(denominations.reduce((s,d)=>s+d*(Number(state.cash[d])||0),0))}
-$('reset-cash').addEventListener('click',()=>ask('Borrar conteo','Se pondrán todas las cantidades en cero. ¿Continuar?',()=>{state.cash={};save();renderCashFields();updateCashTotal();toast('Conteo reiniciado')}));
-function dateWithin(date,period){const d=safeDate(date),now=safeDate(today());if(period==='all')return true;if(period==='day')return date===today();if(period==='month')return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();const from=new Date(now);from.setDate(from.getDate()-6);from.setHours(0,0,0,0);return d>=from&&d<=now}
-function renderSummary(){const trips=state.trips.filter(t=>dateWithin(t.date,summaryPeriod)),expenses=state.expenses.filter(x=>dateWithin(x.date,summaryPeriod)),inc=incomeTotal(trips),exp=expenseTotal(expenses);$('summary-income').textContent=money(inc);$('summary-expenses').textContent=money(exp);$('summary-net').textContent=money(inc-exp);$('report-date').textContent=`Generado el ${today()} · Período: ${{day:'hoy',week:'últimos 7 días',month:'este mes',all:'todo el período'}[summaryPeriod]}`;$('report-trips').textContent=trips.length;$('report-expense-count').textContent=expenses.length;$('report-net').textContent=money(incomeTotal(state.trips)-expenseTotal(state.expenses));const dates=new Set([...state.trips.map(t=>t.date),...state.expenses.map(x=>x.date)]);const sorted=[...dates].sort().reverse();$('daily-summary-body').innerHTML=sorted.map(date=>{const i=incomeTotal(state.trips.filter(t=>t.date===date)),g=expenseTotal(state.expenses.filter(x=>x.date===date)),net=i-g;return `<tr><td>${esc(date)}</td><td>${num(i)}</td><td>${num(g)}</td><td class="money ${net<0?'negative':'positive'}">${num(net)}</td></tr>`}).join('')||rowEmpty(4,'Todavía no hay movimientos')}
-document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>{summaryPeriod=b.dataset.period;document.querySelectorAll('[data-period]').forEach(x=>x.classList.toggle('active',x===b));renderSummary()}));
-
-$('generate-report').addEventListener('click',()=>{renderSummary();toast('Informe actualizado')});
-$('print-btn').addEventListener('click',()=>{switchPage('resumen');renderSummary();setTimeout(()=>window.print(),100)});
-
-// PDF GERENCIAL - sin backticks anidados
-$('download-report-pdf')?.addEventListener('click', ()=>{
-  renderSummary();
-  var periodLabel = {day:'HOY', week:'ULTIMOS 7 DIAS', month:'ESTE MES', all:'TODO'}[summaryPeriod] || summaryPeriod;
-  var range = (function(){ var now=new Date(); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; if(summaryPeriod==='day') return {start:today(), end:today()}; if(summaryPeriod==='week'){ var s=new Date(); s.setDate(now.getDate()-6); return {start:toStr(s), end:today()}; } if(summaryPeriod==='month'){ var s=new Date(now.getFullYear(), now.getMonth(), 1); return {start:toStr(s), end:today()}; } return null; })();
-  var fTrips = range ? state.trips.filter(function(t){ return t.date >= range.start && t.date <= range.end; }) : state.trips;
-  var fExp = range ? state.expenses.filter(function(x){ return x.date >= range.start && x.date <= range.end; }) : state.expenses;
-  if(fTrips.length===0 && fExp.length===0){ toast('No hay datos'); return; }
-  var inc=0,gross=0,exp=0; fTrips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; }); fExp.forEach(function(x){ exp+=Number(x.amount)||0; });
-  var comm=gross-inc; var ganancia=inc-exp; var avg=fTrips.length?Math.round(inc/fTrips.length):0;
-  var byPay={Efectivo:0,Transferencia:0,Tarjeta:0}; fTrips.forEach(function(t){ if(byPay[t.payment]!==undefined) byPay[t.payment]+=Number(t.net)||0; });
-  var byServ={}; fTrips.forEach(function(t){ byServ[t.service]=(byServ[t.service]||0)+ (Number(t.net)||0); });
-  var dailyMap={}; fTrips.forEach(function(t){ dailyMap[t.date]=dailyMap[t.date]||{inc:0,exp:0}; dailyMap[t.date].inc+=Number(t.net)||0; }); fExp.forEach(function(x){ dailyMap[x.date]=dailyMap[x.date]||{inc:0,exp:0}; dailyMap[x.date].exp+=Number(x.amount)||0; });
-  var dailyRows=''; Object.keys(dailyMap).sort().reverse().forEach(function(d){ dailyRows+='<tr><td>'+d+'</td><td>'+money(dailyMap[d].inc)+'</td><td>'+money(dailyMap[d].exp)+'</td><td><b>'+money(dailyMap[d].inc-dailyMap[d].exp)+'</b></td></tr>'; });
-  var tripsRows=''; fTrips.slice().reverse().forEach(function(t){ tripsRows+='<tr><td>'+t.date+'</td><td>'+t.service+'</td><td>'+(t.gross!=null?money(t.gross):'—')+'</td><td>'+t.payment+'</td><td>'+money(t.net)+'</td><td>'+(t.comment||'—')+'</td></tr>'; });
-  var expRows=''; fExp.slice().reverse().forEach(function(x){ expRows+='<tr><td>'+x.date+'</td><td>'+x.type+'</td><td>'+money(x.amount)+'</td><td>'+(x.comment||'—')+'</td></tr>'; });
-  var servRows=''; Object.keys(byServ).forEach(function(s){ servRows+='<tr><td><span class="badge">'+s+'</span></td><td>'+money(byServ[s])+'</td></tr>'; });
-  var win=window.open('', '_blank'); if(!win){ toast('Permite ventanas emergentes'); return; }
-  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Período: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' · Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Método de Pago</h2><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Día</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro · Guaraníes paraguayos (₲)</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script><div id="exec-overlay"><div id="exec-box"><div class="exec-header"><h2 style="margin:0;font-size:16px">📊 Informe Ejecutivo</h2><div style="display:flex;gap:8px"><button id="exec-pdf" style="border:0;background:#101827;color:#fff;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer">⬇ PDF</button><button id="close-exec" style="border:0;background:#eef2ff;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer">✕ Cerrar</button></div></div><div id="exec-content" class="exec-body">Cargando...</div></div></div>
-</body></html>';
-  win.document.write(htmlPdf); win.document.close(); toast('PDF gerencial listo');
-});
-
-$('download-report-excel')?.addEventListener('click', ()=>{
-  renderSummary();
-  var periodLabel = {day:'HOY', week:'ULTIMOS_7_DIAS', month:'ESTE_MES', all:'TODO'}[summaryPeriod] || summaryPeriod;
-  var range = (function(){ var now=new Date(); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; if(summaryPeriod==='day') return {start:today(), end:today()}; if(summaryPeriod==='week'){ var s=new Date(); s.setDate(now.getDate()-6); return {start:toStr(s), end:today()}; } if(summaryPeriod==='month'){ var s=new Date(now.getFullYear(), now.getMonth(), 1); return {start:toStr(s), end:today()}; } return null; })();
-  var fTrips = range ? state.trips.filter(function(t){ return t.date >= range.start && t.date <= range.end; }) : state.trips;
-  var fExp = range ? state.expenses.filter(function(x){ return x.date >= range.start && x.date <= range.end; }) : state.expenses;
-  if(fTrips.length===0 && fExp.length===0){ toast('No hay datos'); return; }
-  var inc=0,gross=0,exp=0; fTrips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; }); fExp.forEach(function(x){ exp+=Number(x.amount)||0; });
-  var htmlTable='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>table{border-collapse:collapse} th{background:#101827;color:#fff;padding:8px 10px;font-size:11px} td{border:1px solid #d0d7e3;padding:6px 10px;font-size:11px} .total{font-weight:bold;background:#eef2ff}</style></head><body>';
-  htmlTable+='<h2>Reporte Gerencial '+periodLabel+' - '+today()+'</h2>';
-  htmlTable+='<table><tr><th colspan="7">RESUMEN GERENCIAL</th></tr><tr><td>Período</td><td>'+(range?range.start+' al '+range.end:'Todo')+'</td><td>Viajes</td><td>'+fTrips.length+'</td><td>Gastos</td><td>'+fExp.length+'</td><td></td></tr><tr class="total"><td>Bruto</td><td>'+gross+'</td><td>Comisiones</td><td>'+(gross-inc)+'</td><td>Neto</td><td>'+inc+'</td><td>Ganancia '+(inc-exp)+'</td></tr></table><br>';
-  htmlTable+='<table><tr><th>Tipo</th><th>Fecha</th><th>Servicio/Categoría</th><th>Bruto</th><th>Comisión %</th><th>Pago</th><th>Neto/Monto</th><th>Comentario</th></tr>';
-  fTrips.forEach(function(t){ htmlTable+='<tr><td>Viaje</td><td>'+t.date+'</td><td>'+t.service+'</td><td>'+(t.gross!=null?t.gross:'')+'</td><td>'+(t.commission||0)+'</td><td>'+t.payment+'</td><td>'+t.net+'</td><td>'+(t.comment||'')+'</td></tr>'; });
-  fExp.forEach(function(x){ htmlTable+='<tr><td>Gasto</td><td>'+x.date+'</td><td>'+x.type+'</td><td></td><td></td><td></td><td>'+x.amount+'</td><td>'+(x.comment||'')+'</td></tr>'; });
-  htmlTable+='</table></body></html>';
-  var blob=new Blob([htmlTable],{type:'application/vnd.ms-excel;charset=utf-8;'});
-  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='reporte-gerencial-'+periodLabel+'-'+today()+'.xls'; a.click(); setTimeout(function(){URL.revokeObjectURL(url);},1000);
-  toast('Excel gerencial descargado');
-});
-
-
-// --- 2 pasos ---
-function showTripStep(n){
-  const s1=$('trip-step-1'), s2=$('trip-step-2');
-  if(!s1||!s2) return;
-  if(n===1){ s1.classList.remove('hidden'); s2.classList.add('hidden'); }
-  else { s1.classList.add('hidden'); s2.classList.remove('hidden'); s2.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-}
-function validateAndGoStep2(){
-  const amount = Number($('trip-amount').value);
-  if(!amount || amount<1){ toast('Ingresa el monto del viaje'); $('trip-amount').focus(); return false; }
-  updatePreview();
-  showTripStep(2);
-  setTimeout(()=>{ const el=$('trip-payment'); if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 200);
-  return true;
-}
-$('trip-next-btn')?.addEventListener('click', validateAndGoStep2);
-$('trip-back-btn')?.addEventListener('click', ()=> showTripStep(1));
-const _amt = $('trip-amount');
-if(_amt){
-  _amt.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.keyCode === 13){
-      if(_amt.value && Number(_amt.value)>=1){ e.preventDefault(); validateAndGoStep2(); }
-    }
-  });
-}
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='Tab' && document.activeElement && document.activeElement.id==='trip-amount'){
-    if($('trip-amount').value){ e.preventDefault(); validateAndGoStep2(); }
-  }
-});
-
-// --- Botones método de pago ---
-function setPaymentMethod(method){
-  const input=$('trip-payment'); if(input) input.value=method;
-  document.querySelectorAll('.pay-opt').forEach(b=> b.classList.toggle('active', b.dataset.payment===method));
-  updatePreview();
-}
-document.querySelectorAll('.pay-opt').forEach(btn=>{ btn.addEventListener('click', ()=> setPaymentMethod(btn.dataset.payment)); });
-setTimeout(()=> setPaymentMethod('Efectivo'), 300);
-
-// Reset paso 1 al abrir modal
-$('open-trip-modal')?.addEventListener('click', ()=> showTripStep(1));
-$('trip-form')?.addEventListener('submit', ()=> setTimeout(()=> showTripStep(1), 400));
-
-// --- Descargar reportes ---
-function _getRange(){
-  const now=new Date(); const toStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  if(summaryPeriod==='day') return {start:today(), end:today()};
-  if(summaryPeriod==='week'){ const s=new Date(); s.setDate(now.getDate()-6); return {start:toStr(s), end:today()}; }
-  if(summaryPeriod==='month'){ const s=new Date(now.getFullYear(), now.getMonth(), 1); return {start:toStr(s), end:today()}; }
-  return null;
-}
-function renderBonus(){const b=state.bonus;$('bonus-trip-goal').value=b.target??'';$('bonus-amount').value=b.amount??'';$('bonus-amount-display').textContent=b.amount?money(b.amount):'₲ 0';const pct=b.target?Math.min(100,b.count/b.target*100):0;$('bonus-fill').style.width=pct+'%';$('bonus-progress-text').textContent=b.target?`${b.count} de ${b.target} viajes Bolt completados (${Math.round(pct)}%)`:'Configura una meta de viajes para comenzar.';$('bonus-status').textContent=!b.target?'Sin configurar':b.claimed?'Bono registrado':b.count>=b.target?'Meta alcanzada':'En progreso';$('bonus-status').classList.toggle('ready',!!b.target&&(b.claimed||b.count>=b.target))}
-function checkBonus(){const b=state.bonus;if(b.target&&b.amount&&!b.claimed&&b.count>=b.target){b.claimed=true;state.trips.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+'bonus',date:today(),service:'Bono',gross:null,commission:0,payment:'Bono',net:Math.round(b.amount),comment:`Bono automático por ${b.target} viajes Bolt`});save();toast('¡Meta de bono alcanzada! Se agregó el bono a tus ingresos.')}}
-$('bonus-form').addEventListener('submit',e=>{e.preventDefault();const target=Math.floor(Number($('bonus-trip-goal').value)),amount=Number($('bonus-amount').value);if(target<1||amount<=0){toast('Introduce una meta y un bono mayores a cero.');return}state.bonus.target=target;state.bonus.amount=Math.round(amount);state.bonus.claimed=false;save();checkBonus();renderAll();toast('Meta de bono guardada')});
-$('reset-bonus').addEventListener('click',()=>ask('Reiniciar bono','Se reiniciará el contador y la meta. Si ya se registró un bono como viaje, ese ingreso no se borrará. ¿Continuar?',()=>{state.bonus={count:0,target:null,amount:null,claimed:false};save();renderAll();toast('Contador de bono reiniciado')}));
-$('goal-form').addEventListener('submit',e=>{e.preventDefault();const goal=Number($('goal-input').value);if(!Number.isFinite(goal)||goal<0){toast('Ingresa una meta válida.');return}state.goal=Math.round(goal);save();renderAll();toast('Meta diaria guardada')});
-$('quick-goal').addEventListener('click',()=>{switchPage('ajustes');$('goal-input').focus()});
-$('remove-goal').addEventListener('click',()=>ask('Quitar meta diaria','La barra de progreso mostrará 0% hasta que configures otra meta.',()=>{state.goal=0;save();renderAll();toast('Meta quitada')}));
-$('commission-form').addEventListener('submit',e=>{e.preventDefault();const a=Number($('default-bolt-auto').value),m=Number($('default-bolt-moto').value);if([a,m].some(n=>!Number.isFinite(n)||n<0||n>100)){toast('Las comisiones deben estar entre 0 y 100%.');return}state.commission={'Bolt Auto':a,'Bolt Moto':m};save();if(selectedService.startsWith('Bolt'))$('trip-commission').value=state.commission[selectedService];updatePreview();toast('Comisiones predeterminadas guardadas')});
+function inPeriod(date,p){if(p==='all')return true;if(p==='day')return date===today();const now=new Date(),d=new Date(String(date||'').slice(0,10)+'T12:00:00');if(Number.isNaN(d.getTime()))return false;if(p==='month')return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();const from=new Date(now.getFullYear(),now.getMonth(),now.getDate()-6);return d>=from&&d<=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59)}
+function renderSummary(){const ts=state.trips.filter(t=>inPeriod(t.date,summaryPeriod)),es=state.expenses.filter(x=>inPeriod(x.date,summaryPeriod)),inc=totalIncome(ts),exp=totalExpenses(es);$('summary-income').textContent=money(inc);$('summary-expenses').textContent=money(exp);$('summary-net').textContent=money(inc-exp);$('report-date').textContent=`Generado el ${today()} · Período: ${{day:'hoy',week:'últimos 7 días',month:'este mes',all:'todo el período'}[summaryPeriod]}`;$('report-trips').textContent=ts.length;$('report-expense-count').textContent=es.length;$('report-net').textContent=money(totalIncome(state.trips)-totalExpenses(state.expenses));const dates=[...new Set([...state.trips.map(t=>t.date),...state.expenses.map(x=>x.date)])].sort().reverse();$('daily-summary-body').innerHTML=dates.map(d=>{const i=totalIncome(state.trips.filter(t=>t.date===d)),g=totalExpenses(state.expenses.filter(x=>x.date===d)),n=i-g;return `<tr><td>${esc(d)}</td><td>${num(i)}</td><td>${num(g)}</td><td class="money ${n<0?'negative':'positive'}">${num(n)}</td></tr>`}).join('')||emptyRow(4,'Todavía no hay movimientos')}
 function renderSettings(){$('goal-input').value=state.goal||'';$('default-bolt-auto').value=state.commission['Bolt Auto'];$('default-bolt-moto').value=state.commission['Bolt Moto']}
-function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
-$('csv-btn').addEventListener('click',()=>{const lines=[['Tipo','Fecha','Servicio/Categoría','Monto bruto','Comisión %','Pago','Neto/Monto','Comentario']];state.trips.forEach(t=>lines.push(['Viaje',t.date,t.service,t.gross??'',t.commission??0,t.payment,t.net,t.comment]));state.expenses.forEach(x=>lines.push(['Gasto',x.date,x.type,'','','',x.amount,x.comment]));if(lines.length===1){toast('Todavía no hay movimientos para exportar');return}const csv='\ufeff'+lines.map(r=>r.map(csvCell).join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ruta-finanzas-movimientos-${today()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Archivo CSV preparado para Excel')});
-function applyTheme(theme){document.body.classList.toggle('dark',theme==='dark');$('theme-btn').textContent=theme==='dark'?'☀ Tema claro':'☾ Tema oscuro';try{localStorage.setItem(THEME_KEY,theme)}catch{}}
-$('theme-btn').addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
-try{applyTheme(localStorage.getItem(THEME_KEY)||'light')}catch{applyTheme('light')}
-$('export-btn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({...state,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ruta-finanzas-copia-${today()}.json`;a.click();URL.revokeObjectURL(url);toast('Copia de seguridad exportada')});
-$('import-btn').addEventListener('click',()=>$('import-file').click());
-$('import-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.trips)||!Array.isArray(data.expenses))throw Error('Formato inválido');ask('Importar copia de seguridad','La importación reemplazará los datos actuales. Exporta primero una copia si quieres conservarlos.',()=>{state={...defaults(),...data,commission:{...defaults().commission,...data.commission},bonus:{...defaults().bonus,...data.bonus}};save();selectService(state.selectedService||'Bolt Auto');renderAll();renderSettings();toast('Copia importada correctamente')})}catch(err){toast('No se pudo importar: archivo no válido')}e.target.value=''});
-$('delete-all').addEventListener('click',()=>ask('Borrar todos los datos','Esta acción elimina viajes, gastos, metas y conteo guardados en este navegador. No se puede deshacer. Exporta una copia antes si la necesitas.',()=>{state=defaults();selectedService=state.selectedService;save();selectService(selectedService);renderAll();renderSettings();toast('Todos los datos fueron borrados')}));
-function renderAll(){renderTrips();renderExpenses();renderHero();renderBonus();renderSummary();updateCashTotal();renderSettings(); try{ window.__APP_STATE=state; }catch(e){} }
-$('trip-date').value=today();$('expense-date').value=today();renderCashFields();selectService(selectedService);renderAll();
+function renderAll(){renderTrips();renderExpenses();renderHero();renderBonus();renderCashFields();renderSummary();renderSettings();document.body.classList.toggle('dark',state.theme==='dark');$('theme-btn').textContent=state.theme==='dark'?'☀ Tema claro':'☾ Tema oscuro';}
+function updatePreview(){const amount=Number($('trip-amount').value)||0,bolt=selectedService.startsWith('Bolt'),comm=bolt?Math.min(100,Math.max(0,Number($('trip-commission').value)||0)):0,pay=$('trip-payment').value,card=pay==='Tarjeta';let net=amount,gross=amount,fee=0;if(bolt&&card){net=amount;gross=comm>0&&comm<100?Math.round(net/(1-comm/100)):net;fee=gross-net}else if(bolt){gross=amount;net=Math.round(amount*(1-comm/100));fee=gross-net}const label=bolt?(card?`Tarjeta · Neto recibido: ${money(net)} · Bruto estimado: ${money(gross)}`:`Neto estimado: ${money(net)} · Comisión: ${money(fee)}`):`Se registra como ingreso neto: ${money(net)}`;$('trip-preview').textContent=label;$('trip-preview-step1').textContent=label;$('card-hint').style.display=card&&bolt?'block':'none';$('amount-label').textContent=bolt?(card?'Monto neto recibido (₲)':'Monto bruto del viaje (₲)'):'Monto neto recibido (₲)'}
+function selectService(service){selectedService=service;state.selectedService=service;$$('.service').forEach(b=>b.classList.toggle('active',b.dataset.service===service));$('commission-field').classList.toggle('hidden',!service.startsWith('Bolt'));$('trip-commission').value=state.commission[service]??0;updatePreview();persist()}
+$$('.service').forEach(b=>b.addEventListener('click',()=>selectService(b.dataset.service)));
+$('trip-amount').addEventListener('input',updatePreview);$('trip-commission').addEventListener('input',updatePreview);$$('.pay-opt').forEach(b=>b.addEventListener('click',()=>{$$('.pay-opt').forEach(x=>x.classList.toggle('active',x===b));$('trip-payment').value=b.dataset.payment;updatePreview()}));
+$('trip-next-btn').addEventListener('click',()=>{const amount=Number($('trip-amount').value),comm=Number($('trip-commission').value);if(!amount||amount<=0||!Number.isFinite(amount)||selectedService.startsWith('Bolt')&&(!Number.isFinite(comm)||comm<0||comm>100)){toast('Revisa el monto y la comisión.');return}$('trip-step-1').classList.add('hidden');$('trip-step-2').classList.remove('hidden');});
+$('trip-back-btn').addEventListener('click',()=>{$('trip-step-2').classList.add('hidden');$('trip-step-1').classList.remove('hidden')});
+$('trip-form').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('trip-amount').value),comm=selectedService.startsWith('Bolt')?Number($('trip-commission').value):0;if(!Number.isFinite(amount)||amount<=0||!Number.isFinite(comm)||comm<0||comm>100){toast('Revisa los datos del viaje.');return}const payment=$('trip-payment').value,card=payment==='Tarjeta',bolt=selectedService.startsWith('Bolt');let gross=bolt?amount:null,net=amount;if(bolt&&card){gross=comm>0&&comm<100?Math.round(amount/(1-comm/100)):amount;net=amount}else if(bolt){net=Math.round(amount*(1-comm/100))}const id=window.crypto?.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2);state.trips.push({id,date:$('trip-date').value||today(),service:selectedService,gross,commission:comm,payment,net,comment:$('trip-comment').value.trim()});if(bolt&&!state.bonus.claimed)state.bonus.count++;persist();renderAll();$('trip-amount').value='';$('trip-comment').value='';$('trip-comment').closest('details').open=false;$('trip-date').value=today();$('trip-step-2').classList.add('hidden');$('trip-step-1').classList.remove('hidden');closeTripModal();updatePreview();toast('Viaje guardado correctamente')});
+$('expense-form').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('expense-amount').value);if(!Number.isFinite(amount)||amount<=0){toast('Ingresa un monto válido.');return}state.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2),date:$('expense-date').value||today(),type:$('expense-type').value,amount:Math.round(amount),comment:$('expense-comment').value.trim()});persist();renderAll();$('expense-amount').value='';$('expense-comment').value='';$('expense-date').value=today();toast('Gasto guardado')});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-delete-trip]'),x=e.target.closest('[data-delete-expense]');if(t)ask('Eliminar viaje','Este registro se eliminará. ¿Continuar?',()=>{const old=state.trips.find(v=>v.id===t.dataset.deleteTrip);state.trips=state.trips.filter(v=>v.id!==t.dataset.deleteTrip);if(old?.service?.startsWith('Bolt')&&!state.bonus.claimed)state.bonus.count=Math.max(0,state.bonus.count-1);persist();renderAll();toast('Viaje eliminado')});if(x)ask('Eliminar gasto','Este registro se eliminará. ¿Continuar?',()=>{state.expenses=state.expenses.filter(v=>v.id!==x.dataset.deleteExpense);persist();renderAll();toast('Gasto eliminado')})});
+$('trip-filter').addEventListener('change',renderTrips);$('trip-search').addEventListener('input',renderTrips);$('clear-trip-filter').addEventListener('click',()=>{$('trip-filter').value='';$('trip-search').value='';renderTrips()});
+$('denominations').addEventListener('input',e=>{const m=e.target.id.match(/^denom-(\d+)$/);if(!m)return;state.cash[m[1]]=Math.max(0,Math.floor(Number(e.target.value)||0));persist();updateCashTotal()});$('reset-cash').addEventListener('click',()=>ask('Borrar conteo','Se pondrán todas las cantidades en cero. ¿Continuar?',()=>{state.cash={};persist();renderCashFields();toast('Conteo reiniciado')}));
+$$('[data-period]').forEach(b=>b.addEventListener('click',()=>{summaryPeriod=b.dataset.period;$$('[data-period]').forEach(x=>x.classList.toggle('active',x===b));renderSummary()}));$('generate-report').addEventListener('click',()=>{renderSummary();toast('Informe actualizado')});
+$('goal-form').addEventListener('submit',e=>{e.preventDefault();const v=Number($('goal-input').value);if(!Number.isFinite(v)||v<0){toast('Meta inválida');return}state.goal=Math.round(v);persist();renderAll();toast('Meta guardada')});$('remove-goal').addEventListener('click',()=>{state.goal=0;persist();renderAll();toast('Meta quitada')});
+$('commission-form').addEventListener('submit',e=>{e.preventDefault();const a=Number($('default-bolt-auto').value),m=Number($('default-bolt-moto').value);if(![a,m].every(v=>Number.isFinite(v)&&v>=0&&v<=100)){toast('Las comisiones deben estar entre 0 y 100.');return}state.commission={'Bolt Auto':a,'Bolt Moto':m};persist();$('trip-commission').value=state.commission[selectedService]??0;updatePreview();toast('Comisiones guardadas')});
+$('bonus-form').addEventListener('submit',e=>{e.preventDefault();const target=Math.floor(Number($('bonus-trip-goal').value)),amount=Math.round(Number($('bonus-amount').value));if(target<1||amount<1){toast('Ingresa una meta y un bono válidos.');return}state.bonus={...state.bonus,target,amount,claimed:false};persist();renderBonus();toast('Meta de bono guardada')});$('reset-bonus').addEventListener('click',()=>ask('Reiniciar bono','Se reiniciará el contador y el estado del bono. ¿Continuar?',()=>{state.bonus={count:0,target:state.bonus.target,amount:state.bonus.amount,claimed:false};persist();renderBonus();toast('Contador reiniciado')}));
+$('quick-goal').addEventListener('click',()=>{switchPage('ajustes');$('goal-input').focus()});$('theme-btn').addEventListener('click',()=>{state.theme=state.theme==='dark'?'light':'dark';persist();renderAll()});
+function download(name,data,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+$('export-btn').addEventListener('click',()=>download('drivers-finanzas-respaldo-'+today()+'.json',JSON.stringify({...state,exportedAt:new Date().toISOString(),formatVersion:2},null,2),'application/json'));
+$('import-btn').addEventListener('click',()=>$('import-file').click());$('import-file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const data=JSON.parse(await f.text());if(!data||!Array.isArray(data.trips)||!Array.isArray(data.expenses))throw Error('invalid');ask('Importar respaldo','La importación reemplazará los datos actuales. ¿Continuar?',()=>{state=normalize(data);selectedService=state.selectedService||'Bolt Auto';persist();renderAll();selectService(selectedService);toast('Respaldo importado')})}catch{toast('El archivo no es un respaldo válido.')}finally{e.target.value=''}});
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}$('csv-btn').addEventListener('click',()=>{const rows=[['TIPO','FECHA','SERVICIO/CATEGORIA','BRUTO','PAGO','NETO/GASTO','COMISION','COMENTARIO']];state.trips.forEach(t=>rows.push(['Viaje',t.date,t.service,t.gross??'',t.payment,t.net,t.commission,t.comment]));state.expenses.forEach(x=>rows.push(['Gasto',x.date,x.type,'','',x.amount,'',x.comment]));download('drivers-finanzas-'+today()+'.csv','\ufeff'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv;charset=utf-8')});$('download-report-excel').addEventListener('click',()=>{renderSummary();const ts=state.trips.filter(t=>inPeriod(t.date,summaryPeriod)),es=state.expenses.filter(x=>inPeriod(x.date,summaryPeriod));const rows=[['Drivers Finanzas Pro'],['Periodo',summaryPeriod],['Ingresos netos',totalIncome(ts)],['Gastos',totalExpenses(es)],['Balance',totalIncome(ts)-totalExpenses(es)]];download('resumen-'+summaryPeriod+'-'+today()+'.csv','\ufeff'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv;charset=utf-8')});$('download-report-pdf').addEventListener('click',()=>{switchPage('resumen');setTimeout(()=>window.print(),100)});$('print-btn').addEventListener('click',()=>{switchPage('resumen');setTimeout(()=>window.print(),100)});$('delete-all').addEventListener('click',()=>ask('Borrar todos los datos','Se eliminarán viajes, gastos, meta, bonos y conteo de este navegador. Exporta una copia antes. ¿Continuar?',()=>{state=defaults();selectedService=state.selectedService;persist();renderAll();toast('Todos los datos fueron borrados')}));
+// Carga inteligente: OCR bajo demanda y reconocimiento de voz nativo del navegador.
+function parseAmountFromText(text){
+  const t=String(text||'').replace(/\s+/g,' ');
+  const matches=[...t.matchAll(/(?:₲\s*)?([0-9]{1,3}(?:[.\s][0-9]{3})+|[0-9]{4,9})(?:\s*(?:Gs\.?|guaran[ií]es))?/gi)];
+  const values=matches.map(m=>Number(m[1].replace(/[.\s]/g,''))).filter(n=>n>=1000&&n<100000000);
+  if(!values.length)return 0;
+  // Prioriza total/pagado/importe; evita elegir números pequeños de referencia.
+  const lines=t.split(/[\n;|]/);
+  for(const line of lines){if(/total|importe|pagado|recibido|monto|a cobrar/i.test(line)){const mm=line.match(/([0-9]{1,3}(?:[.\s][0-9]{3})+|[0-9]{4,9})/);if(mm){const n=Number(mm[1].replace(/[.\s]/g,''));if(n>=1000)return n;}}}
+  return Math.max(...values);
+}
+function detectService(text){const t=String(text||'').toLowerCase();if(/uber/.test(t))return /moto|motocicleta/.test(t)?'Uber Moto':'Uber Auto';if(/bolt/.test(t))return /moto|motocicleta/.test(t)?'Bolt Moto':'Bolt Auto';return selectedService||'Bolt Auto'}
+function detectPayment(text){const t=String(text||'').toLowerCase();if(/tarjeta|cr[eé]dito|d[eé]bito|pos/.test(t))return 'Tarjeta';if(/transfer|banco|qr|alias/.test(t))return 'Transferencia';return 'Efectivo'}
+function prepareSmartTrip(amount,service,payment,source){
+  if(!amount||amount<1){$('capture-status').textContent='No pude identificar un importe válido. Puedes ingresarlo manualmente.';return;}
+  openTripModal();selectService(service);$('trip-date').value=today();$('trip-amount').value=String(amount);$('trip-amount').dispatchEvent(new Event('input',{bubbles:true}));$('trip-payment').value=payment;$$('.pay-opt').forEach(b=>b.classList.toggle('active',b.dataset.payment===payment));$('trip-comment').value='Carga asistida: '+source;$('trip-step-1').classList.remove('hidden');$('trip-step-2').classList.add('hidden');updatePreview();$('capture-status').textContent=`${source}: detecté ${money(amount)} · ${service} · ${payment}. Revisa y pulsa Siguiente para guardar.`;
+}
+$('voice-capture').addEventListener('click',()=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$('capture-status').textContent='El reconocimiento de voz no está disponible en este navegador. Prueba Chrome actualizado o usa OCR.';return;}
+  const rec=new SR();rec.lang='es-PY';rec.interimResults=false;rec.maxAlternatives=1;
+  $('voice-capture').disabled=true;$('voice-capture').textContent='🎙️ Escuchando…';$('capture-status').textContent='Di el importe, servicio y pago. Ejemplo: “veinticinco mil Bolt Moto efectivo”.';
+  rec.onresult=e=>{const transcript=e.results?.[0]?.[0]?.transcript||'';const amount=parseSpokenAmount(transcript);prepareSmartTrip(amount,detectService(transcript),detectPayment(transcript),'Voz');};
+  rec.onerror=e=>{$('capture-status').textContent='No se pudo reconocer la voz ('+e.error+'). Puedes intentar nuevamente.';};
+  rec.onend=()=>{$('voice-capture').disabled=false;$('voice-capture').textContent='🎙️ Cargar por voz';};
+  try{rec.start()}catch(e){$('capture-status').textContent='No se pudo iniciar el micrófono. Verifica permisos del navegador.';$('voice-capture').disabled=false;$('voice-capture').textContent='🎙️ Cargar por voz';}
+});
+function parseSpokenAmount(text){
+  const direct=parseAmountFromText(text);if(direct)return direct;
+  const numericMil=String(text).toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*mil/);if(numericMil)return Math.round(Number(numericMil[1].replace(',','.'))*1000);
+  const words=String(text).toLowerCase().replace(/guaran[ií]es|gs\.?|bolt|uber|moto|auto|efectivo|transferencia|tarjeta/g,' ').trim();
+  const units={cero:0,un:1,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,veinte:20,veintiuno:21,veintidos:22,veintitrés:23,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintiséis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,quinientos:500,mil:1000};
+  let total=0,part=0;words.split(/[^a-záéíóúñ]+/).forEach(w=>{if(units[w]!=null){if(w==='mil'){total+=(part||1)*1000;part=0}else part+=units[w]}});return total+part;
+}
+$('ocr-capture').addEventListener('click',()=>$('ocr-file').click());
+$('ocr-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  $('ocr-capture').disabled=true;$('ocr-capture').textContent='⌛ Analizando…';$('capture-status').textContent='Preparando imagen…';
+  try{
+    if(!window.Tesseract){await new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';sc.onload=resolve;sc.onerror=()=>reject(new Error('No se pudo cargar el motor OCR.'));document.head.appendChild(sc);});}
+    const worker=await Tesseract.createWorker('spa',1,{logger:m=>{if(m.status==='recognizing text')$('capture-status').textContent='Leyendo comprobante… '+Math.round((m.progress||0)*100)+'%';}});
+    const result=await worker.recognize(file);await worker.terminate();const text=result.data.text||'';const amount=parseAmountFromText(text);
+    if(!amount){$('capture-status').textContent='No encontré un total claro en la imagen. Intenta una foto más nítida o carga por voz.';}
+    else prepareSmartTrip(amount,detectService(text),detectPayment(text),'OCR');
+  }catch(err){$('capture-status').textContent='Error al procesar la imagen: '+(err.message||'intenta nuevamente');}
+  finally{$('ocr-file').value='';$('ocr-capture').disabled=false;$('ocr-capture').textContent='📷 Leer comprobante';}
+});
+// El informe ejecutivo utiliza el mismo estado y el mismo filtro del informe normal.
+function renderExecutive(){
+  const ts=state.trips.filter(t=>inPeriod(t.date,summaryPeriod)),es=state.expenses.filter(x=>inPeriod(x.date,summaryPeriod));
+  const inc=totalIncome(ts),exp=totalExpenses(es),bal=inc-exp,count=ts.length,fees=ts.reduce((a,t)=>a+Math.max(0,(Number(t.gross)||Number(t.net)||0)-(Number(t.net)||0)),0);
+  $('exec-income').textContent=money(inc);$('exec-expenses').textContent=money(exp);$('exec-balance').textContent=money(bal);$('exec-balance').className=bal>=0?'positive':'negative';$('exec-trips').textContent=count+' · '+money(count?inc/count:0)+' por viaje';$('exec-commission').textContent=money(fees);$('exec-cost-trip').textContent=money(count?exp/count:0);
+  $('exec-insight').textContent=count===0&&es.length===0?'No hay movimientos en este período. Registra viajes y gastos para generar conclusiones.':bal>=0?`Resultado positivo: ${money(bal)}. Los ingresos netos cubren los gastos registrados en el período.`:`Resultado negativo: ${money(Math.abs(bal))}. Los gastos superan los ingresos netos; revisa combustible, viáticos y cantidad de viajes.`;
+}
+$('open-exec-dashboard').addEventListener('click',()=>{$('executive-report').classList.remove('hidden');renderExecutive();$('executive-report').scrollIntoView({behavior:'smooth',block:'start'});});
+$('close-executive').addEventListener('click',()=>$('executive-report').classList.add('hidden'));
+// Actualiza también el ejecutivo cuando cambia el rango, sin abrirlo automáticamente.
+$$('[data-period]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{if(!$('executive-report').classList.contains('hidden'))renderExecutive()},0)));
+$('trip-date').value=today();$('expense-date').value=today();selectService(selectedService);renderAll();
 })();
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script>
-(function(){
-  var camInput=document.getElementById('ultra-cam-input');
-  var instantBtn=document.getElementById('instant-capture-btn');
-  var vozBtn=document.getElementById('ultra-voz-btn');
-  var vozLabel=document.getElementById('ultra-voz-label');
-  var statusEl=document.getElementById('ultra-status');
-  var previewImg=document.getElementById('ultra-preview-img');
-  var ocrCanvas=document.getElementById('ocr-canvas');
-  var svcQuick=document.getElementById('svc-quick');
-
-  function showStat(msg, ok){ statusEl.textContent=msg; statusEl.className='show '+(ok?'ok':'err'); statusEl.style.display='block'; }
-  function hideStat(){ statusEl.style.display='none'; }
-  function hideSvc(){ svcQuick.classList.remove('show'); svcQuick.innerHTML=''; }
-
-  function saveTrip(amount, payment, service){
-    try{ var svcBtn=document.querySelector('[data-service="'+service+'"]'); if(svcBtn) svcBtn.click(); }catch(e){}
-    var amountInput=document.getElementById('trip-amount');
-    var paymentInput=document.getElementById('trip-payment');
-    var form=document.getElementById('trip-form');
-    if(!amountInput||!form){ showStat('Error formulario', false); return; }
-    amountInput.value=amount;
-    amountInput.dispatchEvent(new Event('input',{bubbles:true}));
-    if(paymentInput) paymentInput.value=payment;
-    document.querySelectorAll('.pay-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.payment===payment); });
-    if(window.updatePreview) try{ updatePreview(); }catch(e){}
-    try{ localStorage.setItem('lastService', service); }catch(e){}
-    setTimeout(function(){
-      try{ form.requestSubmit(); }catch(e){ form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})); }
-      showStat('✅ Guardado: ₲'+amount.toLocaleString()+' - '+payment+' - '+service, true);
-      hideSvc();
-      setTimeout(function(){ hideStat(); if(previewImg) previewImg.classList.remove('show'); }, 4000);
-    }, 300);
-  }
-
-  function showServiceSelector(amount, payment, detectedService){
-    var services=[
-      {id:'Bolt Auto', label:'🚗 Bolt Auto'},
-      {id:'Bolt Moto', label:'🏍️ Bolt Moto'},
-      {id:'Uber Auto', label:'🚗 Uber Auto'},
-      {id:'Uber Moto', label:'🏍️ Uber Moto'}
-    ];
-    var h='';
-    services.forEach(function(s){
-      var active=s.id===detectedService;
-      h+='<button data-svc="'+s.id+'" style="border:'+(active?'2px solid #2a5bd7':'1px solid #dbe6ff')+';background:'+(active?'#2a5bd7':'#fff')+';color:'+(active?'#fff':'#333')+'">'+s.label+(active?' ✓':'')+'</button>';
-    });
-    svcQuick.innerHTML=h;
-    svcQuick.classList.add('show');
-    showStat('📷 Detecté ₲'+amount.toLocaleString()+' '+payment+' - Elegí servicio', true);
-    svcQuick.querySelectorAll('button').forEach(function(btn){
-      btn.addEventListener('click', function(){ saveTrip(amount, payment, this.getAttribute('data-svc')); });
-    });
-  }
-
-  function preprocess(img){
-    var w=img.width, h=img.height;
-    var top=Math.floor(h*0.20), bottom=Math.floor(h*0.90), left=Math.floor(w*0.05), right=Math.floor(w*0.95);
-    var cw=right-left, ch=bottom-top;
-    var maxW=1000, scale=Math.min(1, maxW/cw);
-    ocrCanvas.width=Math.floor(cw*scale);
-    ocrCanvas.height=Math.floor(ch*scale);
-    var ctx=ocrCanvas.getContext('2d');
-    ctx.fillStyle='#fff'; ctx.fillRect(0,0,ocrCanvas.width,ocrCanvas.height);
-    ctx.drawImage(img, left, top, cw, ch, 0, 0, ocrCanvas.width, ocrCanvas.height);
-    var id=ctx.getImageData(0,0,ocrCanvas.width,ocrCanvas.height);
-    var d=id.data;
-    for(var i=0;i<d.length;i+=4){ var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; var val=gray>165?255:gray<85?0:255; d[i]=d[i+1]=d[i+2]=val; }
-    ctx.putImageData(id,0,0);
-    return ocrCanvas;
-  }
-
-  async function runOcr(canvas, paymentHint){
-    try{
-      showStat('📷 Leyendo monto...', true);
-      var result=await Tesseract.recognize(canvas, 'eng', {
-        logger:function(m){ if(m.status==='recognizing text') showStat('📷 '+Math.round(m.progress*100)+'%', true); },
-        tessedit_char_whitelist: '0123456789.,',
-        tessedit_pageseg_mode: '6'
-      });
-      var txt=result.data.text||'';
-      var amounts=[];
-      var re=/([0-9]{1,3}(?:[.,][0-9]{3})*|[0-9]{3,6})/g;
-      var mm;
-      while((mm=re.exec(txt))!==null){ var n=parseInt(mm[1].replace(/[^0-9]/g,''),10); if(n>=500 && n<=200000) amounts.push(n); }
-      amounts=[...new Set(amounts)].sort(function(a,b){return b-a;});
-      var amount=amounts[0]||null;
-      var low=txt.toLowerCase();
-      var payment=paymentHint||'Efectivo';
-      if(low.indexOf('tarjeta')!==-1) payment='Tarjeta';
-      else if(low.indexOf('transfer')!==-1) payment='Transferencia';
-      else if(low.indexOf('efectivo')!==-1 || low.indexOf('recoge')!==-1) payment='Efectivo';
-      var lastSvc=null; try{ lastSvc=localStorage.getItem('lastService'); }catch(e){}
-      var service=lastSvc||'Bolt Auto';
-      if(low.indexOf('moto')!==-1) service=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
-      else if(low.indexOf('uber')!==-1) service='Uber Auto';
-      if(amount){ showServiceSelector(amount, payment, service); }
-      else { showStat('⚠️ No leí monto - ingresá manual', false); document.getElementById('trip-modal')?.classList.add('show'); }
-    }catch(err){ console.error(err); showStat('❌ Error OCR', false); }
-  }
-
-  if(camInput){
-    camInput.addEventListener('change', function(e){
-      var file=e.target.files[0]; if(!file) return;
-      if(previewImg){ previewImg.src=URL.createObjectURL(file); previewImg.classList.add('show'); }
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        var img=new Image();
-        img.onload=function(){ var c=preprocess(img); runOcr(c,'Efectivo'); };
-        img.src=ev.target.result;
-      };
-      reader.readAsDataURL(file);
-      e.target.value='';
-    });
-  }
-
-  if(instantBtn){
-    instantBtn.addEventListener('click', async function(){
-      if(!navigator.mediaDevices?.getDisplayMedia){ showStat('⚠️ Usá Galería', false); return; }
-      try{
-        showStat('⚡ Seleccioná ventana de Bolt...', true);
-        var stream=await navigator.mediaDevices.getDisplayMedia({video:true});
-        var video=document.createElement('video');
-        video.srcObject=stream; video.autoplay=true; video.muted=true;
-        await new Promise(function(r){ video.onloadedmetadata=r; });
-        await new Promise(function(r){ setTimeout(r,800); });
-        var temp=document.createElement('canvas');
-        temp.width=video.videoWidth; temp.height=video.videoHeight;
-        temp.getContext('2d').drawImage(video,0,0);
-        stream.getTracks().forEach(function(t){ t.stop(); });
-        if(previewImg){ previewImg.src=temp.toDataURL(); previewImg.classList.add('show'); }
-        var img=new Image();
-        img.onload=function(){ var c=preprocess(img); runOcr(c,'Efectivo'); };
-        img.src=temp.toDataURL();
-      }catch(err){ if(err.name==='NotAllowedError') showStat('❌ Cancelaste', false); else showStat('⚠️ '+err.message, false); }
-    });
-  }
-
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  var rec=null, listening=false;
-  var wordMap={'cero':0,'uno':1,'una':1,'dos':2,'tres':3,'cuatro':4,'cinco':5,'seis':6,'siete':7,'ocho':8,'nueve':9,'diez':10,'once':11,'doce':12,'trece':13,'catorce':14,'quince':15,'dieciseis':16,'dieciséis':16,'diecisiete':17,'dieciocho':18,'diecinueve':19,'veinte':20,'veintiuno':21,'veintidos':22,'veintidós':22,'veintitres':23,'veintitrés':23,'veinticuatro':24,'veinticinco':25,'veintiseis':26,'veintiséis':26,'veintisiete':27,'veintiocho':28,'veintinueve':29,'treinta':30,'cuarenta':40,'cincuenta':50,'sesenta':60,'setenta':70,'ochenta':80,'noventa':90,'cien':100,'ciento':100};
-
-  function wordsToNumber(text){
-    var low=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    var m=low.match(/(cero|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien)[ ]*(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)?[ ]*mil/);
-    if(m){ var base=wordMap[m[1]]||0; var extra=m[2]?wordMap[m[2]]||0:0; var tot=base+extra; if(tot>0) return tot*1000; }
-    for(var k in wordMap){ if(low.indexOf(k+' mil')!==-1) return wordMap[k]*1000; }
-    return null;
-  }
-  function parseVoice(t){
-    var low=t.toLowerCase();
-    var amt=null;
-    var mMil=low.match(/([0-9]+)[ ]*mil/);
-    var mK=low.match(/([0-9]+)[ ]*k/);
-    var mNum=low.match(/([0-9]{3,6})/);
-    if(mMil) amt=parseInt(mMil[1],10)*1000;
-    else if(mK) amt=parseInt(mK[1],10)*1000;
-    else if(mNum){ var n=parseInt(mNum[1],10); amt=n>=100 && n<1000 ? n*1000 : n; }
-    else amt=wordsToNumber(low);
-    var pay='Efectivo';
-    if(low.indexOf('tarjeta')!==-1) pay='Tarjeta';
-    else if(low.indexOf('transfer')!==-1) pay='Transferencia';
-    var serv=null; try{ serv=localStorage.getItem('lastService'); }catch(e){}
-    serv=serv||'Bolt Auto';
-    if(low.indexOf('moto')!==-1) serv=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
-    else if(low.indexOf('auto')!==-1) serv=low.indexOf('uber')!==-1?'Uber Auto':'Bolt Auto';
-    else if(low.indexOf('bolt')!==-1) serv=low.indexOf('moto')!==-1?'Bolt Moto':'Bolt Auto';
-    else if(low.indexOf('uber')!==-1) serv=low.indexOf('moto')!==-1?'Uber Moto':'Uber Auto';
-    return {amount:amt,payment:pay,service:serv};
-  }
-
-  if(vozBtn){
-    vozBtn.addEventListener('click', function(){
-      if(!SR){ alert('Usá Chrome para voz'); return; }
-      if(listening&&rec){ try{ rec.stop(); }catch(e){} return; }
-      rec=new SR(); rec.lang='es-ES'; rec.interimResults=false; rec.maxAlternatives=1;
-      rec.onstart=function(){ listening=true; vozLabel.textContent='Escuchando...'; showStat('🎤 Decí: "veinte mil efectivo moto"', true); };
-      rec.onend=function(){ listening=false; vozLabel.textContent='Voz'; };
-      rec.onerror=function(e){ listening=false; vozLabel.textContent='Voz'; showStat('❌ Voz: '+e.error, false); };
-      rec.onresult=function(e){
-        var tr=e.results[0][0].transcript;
-        var p=parseVoice(tr);
-        if(p.amount){ showServiceSelector(p.amount, p.payment, p.service); }
-        else { showStat('🎤 "'+tr+'" no entendí monto', false); }
-      };
-      try{ rec.start(); }catch(err){ showStat('❌ '+err.message, false); }
-    });
-  }
-
-  // EJECUTIVO GERENCIAL QUE TE GUSTÓ - AHORA DENTRO DE LA APP
-  var execOverlay=document.getElementById('exec-overlay');
-  var execContent=document.getElementById('exec-content');
-  var execBtn=document.getElementById('open-exec-dashboard');
-  var closeExec=document.getElementById('close-exec');
-  var execPdfBtn=document.getElementById('exec-pdf');
-
-  function buildExecHTML(){
-    var trips=[], expenses=[], summaryPeriod='all';
-    try{
-      if(window.__APP_STATE && window.__APP_STATE.trips){
-        trips=window.__APP_STATE.trips;
-        expenses=window.__APP_STATE.expenses||[];
-        summaryPeriod=window.__APP_STATE.summaryPeriod||'all';
-      } else {
-        var raw=localStorage.getItem('ruta_finanzas_v1');
-        if(raw){ var parsed=JSON.parse(raw); trips=parsed.trips||[]; expenses=parsed.expenses||[]; }
-      }
-    }catch(e){}
-    // Si estamos en la página de resumen, usar el periodo actual seleccionado
-    try{
-      var activePeriod=document.querySelector('.period.active');
-      if(activePeriod) summaryPeriod=activePeriod.dataset.period;
-    }catch(e){}
-    
-    var range=null;
-    var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-    if(summaryPeriod==='day') range={start:todayStr(), end:todayStr()};
-    else if(summaryPeriod==='week'){ var now=new Date(); var s=new Date(); s.setDate(now.getDate()-6); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; range={start:toStr(s), end:todayStr()}; }
-    else if(summaryPeriod==='month'){ var now=new Date(); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; var s=new Date(now.getFullYear(), now.getMonth(), 1); range={start:toStr(s), end:todayStr()}; }
-    
-    var fTrips = range ? trips.filter(function(t){ return t.date >= range.start && t.date <= range.end; }) : trips;
-    var fExp = range ? expenses.filter(function(x){ return x.date >= range.start && x.date <= range.end; }) : expenses;
-    
-    if(!fTrips.length && !fExp.length){
-      return '<div style="padding:20px;text-align:center"><h3>No hay datos en este período</h3><p>Tu balance de hoy (arriba) es ₲'+(function(){ var inc=0; try{ trips.forEach(function(t){ if(t.date===todayStr()) inc+=Number(t.net||0); }); }catch(e){} return inc.toLocaleString(); })()+'</p><p style="font-size:12px;color:#6b7a90">Cambiá a "Todo el período" o cargá viajes.</p></div>';
-    }
-    
-    var inc=0,gross=0,exp=0;
-    fTrips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
-    fExp.forEach(function(x){ exp+=Number(x.amount)||0; });
-    var comm=gross-inc;
-    var ganancia=inc-exp;
-    var avg=fTrips.length?Math.round(inc/fTrips.length):0;
-    var byPay={Efectivo:0,Transferencia:0,Tarjeta:0};
-    fTrips.forEach(function(t){ if(byPay[t.payment]!==undefined) byPay[t.payment]+=Number(t.net)||0; });
-    var byServ={};
-    fTrips.forEach(function(t){ byServ[t.service]=(byServ[t.service]||0)+Number(t.net||0); });
-    
-    var money=function(n){ return '₲ '+Math.round(Number(n)||0).toLocaleString('es-PY'); };
-    
-    var html='<div style="margin-bottom:12px;font-size:11px;color:#6b7a90">Período: '+(range?range.start+' al '+range.end:'Todo')+' · Viajes: '+fTrips.length+' · Gastos: '+fExp.length+' · Generado: '+todayStr()+'</div>';
-    html+='<div class="kpis"><div class="kpi blue"><span>Brutos</span><strong>'+money(gross)+'</strong><small style="font-size:10px;color:#6b7a90">'+fTrips.length+' viajes</small></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong><small style="font-size:10px">'+(gross?Math.round(comm/gross*100):0)+'%</small></div><div class="kpi green"><span>Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div></div>';
-    html+='<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi dark"><span>Ganancia</span><strong>'+money(ganancia)+'</strong><small style="font-size:10px;color:#a8b5cc">Margen '+(inc?Math.round(ganancia/inc*100):0)+'%</small></div><div class="kpi"><span>Ticket</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Resultado</span><strong style="color:'+(ganancia>=0?'#0a7a4a':'#d93e55')+'">'+money(ganancia)+'</strong></div></div>';
-    
-    html+='<div class="grid2"><div><h3 style="font-size:12px;text-transform:uppercase;margin:16px 0 8px">Mix Cobranza</h3><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div>';
-    html+='<div><h3 style="font-size:12px;text-transform:uppercase;margin:16px 0 8px">Por Servicio</h3><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>';
-    for(var s in byServ){ html+='<tr><td>'+s+'</td><td>'+money(byServ[s])+'</td></tr>'; }
-    html+='</table></div></div>';
-    
-    // Balance por día
-    var dailyMap={};
-    fTrips.forEach(function(t){ dailyMap[t.date]=dailyMap[t.date]||{inc:0,exp:0}; dailyMap[t.date].inc+=Number(t.net)||0; });
-    fExp.forEach(function(x){ dailyMap[x.date]=dailyMap[x.date]||{inc:0,exp:0}; dailyMap[x.date].exp+=Number(x.amount)||0; });
-    html+='<h3 style="font-size:12px;text-transform:uppercase;margin:20px 0 8px">Balance Diario</h3><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th><th>Viajes</th></tr>';
-    Object.keys(dailyMap).sort().reverse().slice(0,14).forEach(function(d){
-      var viajesDia=fTrips.filter(function(t){ return t.date===d; }).length;
-      html+='<tr><td>'+d+'</td><td>'+money(dailyMap[d].inc)+'</td><td>'+money(dailyMap[d].exp)+'</td><td><b>'+money(dailyMap[d].inc-dailyMap[d].exp)+'</b></td><td>'+viajesDia+'</td></tr>';
-    });
-    html+='</table>';
-    
-    return html;
-  }
-
-  function renderExec(){
-    execContent.innerHTML=buildExecHTML();
-  }
-
-  if(execBtn){ execBtn.addEventListener('click', function(){ renderExec(); execOverlay.classList.add('open'); }); }
-  if(closeExec){ closeExec.addEventListener('click', function(){ execOverlay.classList.remove('open'); }); }
-  if(execPdfBtn){
-    execPdfBtn.addEventListener('click', function(){
-      // Disparar el PDF original
-      var btn=document.getElementById('download-report-pdf');
-      if(btn) btn.click();
-      else { window.print(); }
-    });
-  }
-  if(execOverlay){ execOverlay.addEventListener('click', function(e){ if(e.target===execOverlay) execOverlay.classList.remove('open'); }); }
-})();
-</script>
-
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
-                                                                                                                                                                                                   </html>
+</body>
+</html>
