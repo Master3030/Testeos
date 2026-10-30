@@ -147,9 +147,24 @@ body.dark .pay-opt.active{ background:linear-gradient(135deg,#3a6bff,#5d83ff) !i
 #svc-quick{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 #svc-quick.show{display:grid}
 #svc-quick button{padding:14px 6px;border-radius:12px;font-weight:800;font-size:11px;cursor:pointer}
-#exec-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+#exec-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;z-index:9999;padding:12px;overflow:auto}
 #exec-overlay.open{display:flex}
-#exec-box{background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+#exec-box{background:#fff;border-radius:18px;max-width:920px;width:100%;max-height:95vh;overflow:auto;padding:0;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.exec-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #e5eaf2;position:sticky;top:0;background:#fff;z-index:2;border-radius:18px 18px 0 0}
+.exec-body{padding:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:12px;background:#fbfdff}
+.kpi span{display:block;font-size:9px;text-transform:uppercase;color:#6b7a90;font-weight:700}
+.kpi strong{display:block;font-size:16px;margin-top:4px}
+.kpi.green{background:#eefaf4;border-color:#c8ecd9}
+.kpi.blue{background:#eef2ff;border-color:#d6def8}
+.kpi.dark{background:#101827;color:#fff}
+.kpi.dark span{color:#a8b5cc}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.table{width:100%;border-collapse:collapse;font-size:11px;border:1px solid #e5eaf2}
+.table th{background:#f7f9fc;color:#647188;font-size:9px;padding:8px 10px;text-align:left}
+.table td{padding:8px 10px;border-top:1px solid #eef1f6}
+@media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -419,7 +434,8 @@ $('download-report-pdf')?.addEventListener('click', ()=>{
   var expRows=''; fExp.slice().reverse().forEach(function(x){ expRows+='<tr><td>'+x.date+'</td><td>'+x.type+'</td><td>'+money(x.amount)+'</td><td>'+(x.comment||'—')+'</td></tr>'; });
   var servRows=''; Object.keys(byServ).forEach(function(s){ servRows+='<tr><td><span class="badge">'+s+'</span></td><td>'+money(byServ[s])+'</td></tr>'; });
   var win=window.open('', '_blank'); if(!win){ toast('Permite ventanas emergentes'); return; }
-  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Período: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' · Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Método de Pago</h2><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Día</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro · Guaraníes paraguayos (₲)</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script></body></html>';
+  var htmlPdf='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte '+periodLabel+'</title><style>body{font-family:Inter,sans-serif;margin:0;background:#f6f8fb;color:#172033;padding:0}.page{max-width:900px;margin:0 auto;background:#fff;padding:32px 36px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #101827;padding-bottom:18px;margin-bottom:22px}.header h1{margin:0;font-size:22px}.header h1 span{font-size:10px;background:#101827;color:#fff;padding:4px 8px;border-radius:6px;margin-left:8px}.header p{margin:6px 0 0;color:#6b7a90;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.kpi{border:1px solid #e5eaf2;border-radius:14px;padding:14px;background:#fbfdff}.kpi span{display:block;font-size:10px;text-transform:uppercase;color:#6b7a90;font-weight:700}.kpi strong{display:block;font-size:18px;margin-top:6px}.kpi.green{background:#eefaf4;border-color:#c8ecd9}.kpi.blue{background:#eef2ff;border-color:#d6def8}.kpi.dark{background:#101827;color:#fff}.kpi.dark span{color:#a8b5cc}.section{margin:22px 0}.section h2{font-size:13px;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5eaf2}.table th{background:#f7f9fc;color:#647188;font-size:10px;padding:10px 12px;text-align:left}.table td{padding:10px 12px;border-top:1px solid #eef1f6}.badge{background:#eef2ff;color:#3657a8;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}.footer{margin-top:30px;border-top:1px solid #e5eaf2;padding-top:12px;font-size:10px;color:#8a97ab;text-align:center}</style></head><body><div class="page"><div class="header"><div><h1>Drivers Finanzas <span>PRO</span></h1><p>Informe gerencial - '+periodLabel+' - Generado el '+today()+'</p></div><div style="text-align:right;font-size:11px;color:#6b7a90"><div>Período: '+(range?range.start+' al '+range.end:'Todo')+'</div><div>Viajes: '+fTrips.length+' · Gastos: '+fExp.length+'</div></div></div><div class="kpis"><div class="kpi blue"><span>Ingresos Brutos</span><strong>'+money(gross)+'</strong></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong></div><div class="kpi green"><span>Ingresos Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi dark"><span>Ganancia Final</span><strong>'+money(ganancia)+'</strong></div></div><div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Ticket Promedio</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div><div class="kpi"><span>Rentabilidad</span><strong>'+(inc>0?Math.round(ganancia/inc*100):0)+'%</strong></div></div><div class="section grid2"><div><h2>Por Método de Pago</h2><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div><div><h2>Por Servicio</h2><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>'+servRows+'</table></div></div><div class="section"><h2>Balance por Día</h2><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th></tr>'+dailyRows+'</table></div><div class="section"><h2>Detalle Viajes</h2><table class="table"><tr><th>Fecha</th><th>Servicio</th><th>Bruto</th><th>Pago</th><th>Neto</th><th>Comentario</th></tr>'+tripsRows+'</table></div><div class="section"><h2>Detalle Gastos</h2><table class="table"><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Comentario</th></tr>'+expRows+'</table></div><div class="footer">Drivers Finanzas Pro · Guaraníes paraguayos (₲)</div></div><script>window.onload=function(){window.print(); setTimeout(function(){window.close();},400);}<\/script><div id="exec-overlay"><div id="exec-box"><div class="exec-header"><h2 style="margin:0;font-size:16px">📊 Informe Ejecutivo</h2><div style="display:flex;gap:8px"><button id="exec-pdf" style="border:0;background:#101827;color:#fff;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer">⬇ PDF</button><button id="close-exec" style="border:0;background:#eef2ff;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer">✕ Cerrar</button></div></div><div id="exec-content" class="exec-body">Cargando...</div></div></div>
+</body></html>';
   win.document.write(htmlPdf); win.document.close(); toast('PDF gerencial listo');
 });
 
@@ -518,7 +534,6 @@ function renderAll(){renderTrips();renderExpenses();renderHero();renderBonus();r
 $('trip-date').value=today();$('expense-date').value=today();renderCashFields();selectService(selectedService);renderAll();
 })();
 </script>
-<div id="exec-overlay"><div id="exec-box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0">📊 Informe Ejecutivo</h2><button id="close-exec" style="border:0;background:#eef2ff;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer">✕ Cerrar</button></div><div id="exec-content">Cargando...</div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
@@ -618,7 +633,7 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
       if(low.indexOf('moto')!==-1) service=low.indexOf('uber')!==-1?'Uber Moto':'Bolt Moto';
       else if(low.indexOf('uber')!==-1) service='Uber Auto';
       if(amount){ showServiceSelector(amount, payment, service); }
-      else { showStat('⚠️ No leí monto - ingresá manual', false); document.getElementById('trip-modal')?.classList.add('open'); }
+      else { showStat('⚠️ No leí monto - ingresá manual', false); document.getElementById('trip-modal')?.classList.add('show'); }
     }catch(err){ console.error(err); showStat('❌ Error OCR', false); }
   }
 
@@ -710,46 +725,94 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
     });
   }
 
+  // EJECUTIVO GERENCIAL QUE TE GUSTÓ - AHORA DENTRO DE LA APP
   var execOverlay=document.getElementById('exec-overlay');
   var execContent=document.getElementById('exec-content');
   var execBtn=document.getElementById('open-exec-dashboard');
   var closeExec=document.getElementById('close-exec');
-  function renderExec(){
-    var trips=[];
+  var execPdfBtn=document.getElementById('exec-pdf');
+
+  function buildExecHTML(){
+    var trips=[], expenses=[], summaryPeriod='all';
     try{
-      if(window.__APP_STATE && window.__APP_STATE.trips && window.__APP_STATE.trips.length){
+      if(window.__APP_STATE && window.__APP_STATE.trips){
         trips=window.__APP_STATE.trips;
+        expenses=window.__APP_STATE.expenses||[];
+        summaryPeriod=window.__APP_STATE.summaryPeriod||'all';
       } else {
         var raw=localStorage.getItem('ruta_finanzas_v1');
-        if(raw){ var parsed=JSON.parse(raw); if(parsed && parsed.trips) trips=parsed.trips; }
+        if(raw){ var parsed=JSON.parse(raw); trips=parsed.trips||[]; expenses=parsed.expenses||[]; }
       }
-    }catch(e){ console.log(e); }
-    if(!trips.length){
-      // Intentar leer del DOM como último recurso
-      try{
-        var rows=document.querySelectorAll('#report-trips-body tr');
-        if(rows.length && rows[0].querySelector('td')){
-          execContent.innerHTML='<p style="padding:12px">Tienes '+rows.length+' viajes en el reporte. Tu balance de hoy (arriba) es ₲'+document.querySelectorAll('.stat strong')[0]?.textContent+'</p>';
-          return;
-        }
-      }catch(e){}
-      execContent.innerHTML='<p style="padding:12px">No hay viajes cargados en memoria. Refrescá la página. Tu balance de hoy es el que ves arriba en las tarjetas (ej: Ingresos netos de hoy).</p>'; 
-      return;
+    }catch(e){}
+    // Si estamos en la página de resumen, usar el periodo actual seleccionado
+    try{
+      var activePeriod=document.querySelector('.period.active');
+      if(activePeriod) summaryPeriod=activePeriod.dataset.period;
+    }catch(e){}
+    
+    var range=null;
+    var todayStr=function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+    if(summaryPeriod==='day') range={start:todayStr(), end:todayStr()};
+    else if(summaryPeriod==='week'){ var now=new Date(); var s=new Date(); s.setDate(now.getDate()-6); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; range={start:toStr(s), end:todayStr()}; }
+    else if(summaryPeriod==='month'){ var now=new Date(); var toStr=function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }; var s=new Date(now.getFullYear(), now.getMonth(), 1); range={start:toStr(s), end:todayStr()}; }
+    
+    var fTrips = range ? trips.filter(function(t){ return t.date >= range.start && t.date <= range.end; }) : trips;
+    var fExp = range ? expenses.filter(function(x){ return x.date >= range.start && x.date <= range.end; }) : expenses;
+    
+    if(!fTrips.length && !fExp.length){
+      return '<div style="padding:20px;text-align:center"><h3>No hay datos en este período</h3><p>Tu balance de hoy (arriba) es ₲'+(function(){ var inc=0; try{ trips.forEach(function(t){ if(t.date===todayStr()) inc+=Number(t.net||0); }); }catch(e){} return inc.toLocaleString(); })()+'</p><p style="font-size:12px;color:#6b7a90">Cambiá a "Todo el período" o cargá viajes.</p></div>';
     }
-    var totalNeto=0, porPago={}, porSvc={};
-    trips.forEach(function(t){ totalNeto+=Number(t.net||0); porPago[t.payment]=(porPago[t.payment]||0)+1; porSvc[t.service]=(porSvc[t.service]||0)+1; });
-    var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-    html+='<div style="background:#eef7ff;padding:12px;border-radius:12px"><b>Viajes:</b> '+trips.length+'</div>';
-    html+='<div style="background:#eafff1;padding:12px;border-radius:12px"><b>Neto:</b> ₲'+totalNeto.toLocaleString()+'</div></div>';
-    html+='<h4>Por pago</h4><ul>'; for(var k in porPago) html+='<li>'+k+': '+porPago[k]+'</li>'; html+='</ul>';
-    html+='<h4>Por servicio</h4><ul>'; for(var k in porSvc) html+='<li>'+k+': '+porSvc[k]+'</li>'; html+='</ul>';
-    html+='<h4>Últimos 10</h4><table style="width:100%;border-collapse:collapse;font-size:12px"><tr><th>Fecha</th><th>Monto</th><th>Pago</th><th>Servicio</th></tr>';
-    trips.slice(-10).reverse().forEach(function(t){ html+='<tr style="border-top:1px solid #eee"><td>'+(t.date||'')+'</td><td>₲'+Number(t.net||0).toLocaleString()+'</td><td>'+t.payment+'</td><td>'+t.service+'</td></tr>'; });
+    
+    var inc=0,gross=0,exp=0;
+    fTrips.forEach(function(t){ inc+=Number(t.net)||0; gross+=Number(t.gross)||0; });
+    fExp.forEach(function(x){ exp+=Number(x.amount)||0; });
+    var comm=gross-inc;
+    var ganancia=inc-exp;
+    var avg=fTrips.length?Math.round(inc/fTrips.length):0;
+    var byPay={Efectivo:0,Transferencia:0,Tarjeta:0};
+    fTrips.forEach(function(t){ if(byPay[t.payment]!==undefined) byPay[t.payment]+=Number(t.net)||0; });
+    var byServ={};
+    fTrips.forEach(function(t){ byServ[t.service]=(byServ[t.service]||0)+Number(t.net||0); });
+    
+    var money=function(n){ return '₲ '+Math.round(Number(n)||0).toLocaleString('es-PY'); };
+    
+    var html='<div style="margin-bottom:12px;font-size:11px;color:#6b7a90">Período: '+(range?range.start+' al '+range.end:'Todo')+' · Viajes: '+fTrips.length+' · Gastos: '+fExp.length+' · Generado: '+todayStr()+'</div>';
+    html+='<div class="kpis"><div class="kpi blue"><span>Brutos</span><strong>'+money(gross)+'</strong><small style="font-size:10px;color:#6b7a90">'+fTrips.length+' viajes</small></div><div class="kpi"><span>Comisiones</span><strong>'+money(comm)+'</strong><small style="font-size:10px">'+(gross?Math.round(comm/gross*100):0)+'%</small></div><div class="kpi green"><span>Netos</span><strong>'+money(inc)+'</strong></div><div class="kpi"><span>Gastos</span><strong>'+money(exp)+'</strong></div></div>';
+    html+='<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi dark"><span>Ganancia</span><strong>'+money(ganancia)+'</strong><small style="font-size:10px;color:#a8b5cc">Margen '+(inc?Math.round(ganancia/inc*100):0)+'%</small></div><div class="kpi"><span>Ticket</span><strong>'+money(avg)+'</strong></div><div class="kpi"><span>Resultado</span><strong style="color:'+(ganancia>=0?'#0a7a4a':'#d93e55')+'">'+money(ganancia)+'</strong></div></div>';
+    
+    html+='<div class="grid2"><div><h3 style="font-size:12px;text-transform:uppercase;margin:16px 0 8px">Mix Cobranza</h3><table class="table"><tr><th>Método</th><th>Monto</th><th>%</th></tr><tr><td>💵 Efectivo</td><td>'+money(byPay.Efectivo)+'</td><td>'+(inc?Math.round(byPay.Efectivo/inc*100):0)+'%</td></tr><tr><td>🏦 Transferencia</td><td>'+money(byPay.Transferencia)+'</td><td>'+(inc?Math.round(byPay.Transferencia/inc*100):0)+'%</td></tr><tr><td>💳 Tarjeta</td><td>'+money(byPay.Tarjeta)+'</td><td>'+(inc?Math.round(byPay.Tarjeta/inc*100):0)+'%</td></tr></table></div>';
+    html+='<div><h3 style="font-size:12px;text-transform:uppercase;margin:16px 0 8px">Por Servicio</h3><table class="table"><tr><th>Servicio</th><th>Monto</th></tr>';
+    for(var s in byServ){ html+='<tr><td>'+s+'</td><td>'+money(byServ[s])+'</td></tr>'; }
+    html+='</table></div></div>';
+    
+    // Balance por día
+    var dailyMap={};
+    fTrips.forEach(function(t){ dailyMap[t.date]=dailyMap[t.date]||{inc:0,exp:0}; dailyMap[t.date].inc+=Number(t.net)||0; });
+    fExp.forEach(function(x){ dailyMap[x.date]=dailyMap[x.date]||{inc:0,exp:0}; dailyMap[x.date].exp+=Number(x.amount)||0; });
+    html+='<h3 style="font-size:12px;text-transform:uppercase;margin:20px 0 8px">Balance Diario</h3><table class="table"><tr><th>Fecha</th><th>Ingresos</th><th>Gastos</th><th>Resultado</th><th>Viajes</th></tr>';
+    Object.keys(dailyMap).sort().reverse().slice(0,14).forEach(function(d){
+      var viajesDia=fTrips.filter(function(t){ return t.date===d; }).length;
+      html+='<tr><td>'+d+'</td><td>'+money(dailyMap[d].inc)+'</td><td>'+money(dailyMap[d].exp)+'</td><td><b>'+money(dailyMap[d].inc-dailyMap[d].exp)+'</b></td><td>'+viajesDia+'</td></tr>';
+    });
     html+='</table>';
-    execContent.innerHTML=html;
+    
+    return html;
   }
+
+  function renderExec(){
+    execContent.innerHTML=buildExecHTML();
+  }
+
   if(execBtn){ execBtn.addEventListener('click', function(){ renderExec(); execOverlay.classList.add('open'); }); }
   if(closeExec){ closeExec.addEventListener('click', function(){ execOverlay.classList.remove('open'); }); }
+  if(execPdfBtn){
+    execPdfBtn.addEventListener('click', function(){
+      // Disparar el PDF original
+      var btn=document.getElementById('download-report-pdf');
+      if(btn) btn.click();
+      else { window.print(); }
+    });
+  }
   if(execOverlay){ execOverlay.addEventListener('click', function(e){ if(e.target===execOverlay) execOverlay.classList.remove('open'); }); }
 })();
 </script>
