@@ -342,8 +342,8 @@ function localDate(d=today()){return d}
 function tripIncome(t){return Number(t.net)||0}
 function expenseTotal(list){return list.reduce((s,x)=>s+(Number(x.amount)||0),0)}
 function incomeTotal(list){return list.reduce((s,x)=>s+tripIncome(x),0)}
-function tripsToday(){return state.trips.filter(t=>t.date===today())}
-function expensesToday(){return state.expenses.filter(e=>e.date===today())}
+function tripsToday(){var td=today(); return state.trips.filter(function(t){ var d=(t.date||'').trim(); return d===td; });}
+function expensesToday(){var td=today(); return state.expenses.filter(function(e){ var d=(e.date||'').trim(); return d===td; });}
 function todayNet(){return incomeTotal(tripsToday())-expenseTotal(expensesToday())}
 function safeDate(s){const [y,m,d]=String(s||'').split('-').map(Number);return y&&m&&d?new Date(y,m-1,d):new Date(0)}
 function rowEmpty(cols,msg){return `<tr><td colspan="${cols}" class="empty"><b>${esc(msg)}</b>Los registros aparecerán aquí.</td></tr>`}
@@ -478,6 +478,7 @@ init();
 <script>
 (function(){
   function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function forceAllDates(){ try{ var ts=todayStr(); var td=document.getElementById('trip-date'); var ed=document.getElementById('expense-date'); if(td) td.value=ts; if(ed) ed.value=ts; }catch(e){} }
   function forceDate(){
     try{
       var td=document.getElementById('trip-date');
@@ -497,6 +498,7 @@ init();
 <script>
 (function(){
   function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function forceAllDates(){ try{ var ts=todayStr(); var td=document.getElementById('trip-date'); var ed=document.getElementById('expense-date'); if(td) td.value=ts; if(ed) ed.value=ts; }catch(e){} }
 
   document.querySelectorAll('.tab').forEach(function(tab){
     tab.addEventListener('click', function(){
@@ -518,24 +520,46 @@ init();
 
   function showStat(msg, ok){ if(!statusEl) return; statusEl.textContent=msg; statusEl.className='show '+(ok?'ok':'err'); statusEl.style.display='block'; }
 
-  function saveTrip(amount, payment, service){
-    try{ var td=document.getElementById('trip-date'); if(td && !td.value) td.value=todayStr(); }catch(e){}
-    try{ var svcBtn=document.querySelector('[data-service="'+service+'"]'); if(svcBtn) svcBtn.click(); }catch(e){}
-    var amountInput=document.getElementById('trip-amount');
-    var paymentInput=document.getElementById('trip-payment');
-    var form=document.getElementById('trip-form');
-    if(!amountInput||!form){ showStat('Error formulario', false); return; }
-    amountInput.value=amount;
-    amountInput.dispatchEvent(new Event('input',{bubbles:true}));
-    if(paymentInput) paymentInput.value=payment;
-    document.querySelectorAll('.pay-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.payment===payment); });
+    function saveTrip(amount, payment, service){
+    function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function forceAllDates(){ try{ var ts=todayStr(); var td=document.getElementById('trip-date'); var ed=document.getElementById('expense-date'); if(td) td.value=ts; if(ed) ed.value=ts; }catch(e){} }
+    var tripDate = todayStr();
+    try{ var td=document.getElementById('trip-date'); if(td) td.value=tripDate; }catch(e){}
     try{ localStorage.setItem('lastService', service); }catch(e){}
-    setTimeout(function(){
-      try{ form.requestSubmit(); }catch(e){ form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})); }
-      showStat('✅ Guardado: ₲'+amount.toLocaleString()+' - '+payment+' - '+service, true);
+    try{
+      // Calcular neto/bruto como en el form original
+      var commEl=document.getElementById('trip-commission');
+      var comm = service.startsWith('Bolt') ? (commEl ? Number(commEl.value)||25 : 25) : 0;
+      var isCard = payment.toLowerCase().includes('tarjeta');
+      var gross, net;
+      if(!service.startsWith('Bolt')){ net=Math.round(amount); gross=null; }
+      else if(isCard){ net=Math.round(amount); if(comm>=100||comm<=0) gross=net; else gross=Math.round(net/(1-comm/100)); }
+      else { gross=Math.round(amount); net=Math.round(amount*(1-comm/100)); }
+      // Crear viaje directo - GARANTIZADO que entra en hoy
+      var t={
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()),
+        date: tripDate,
+        service: service,
+        gross: gross,
+        commission: comm,
+        payment: payment,
+        net: net,
+        comment: ''
+      };
+      if(typeof state!=='undefined' && state.trips){
+        state.trips.push(t);
+        if(service.startsWith('Bolt') && state.bonus && !state.bonus.claimed){ state.bonus.count++; }
+        if(typeof save==='function'){ save(); }
+        if(typeof checkBonus==='function'){ try{ checkBonus(); }catch(e){} }
+        if(typeof renderAll==='function'){ renderAll(); }
+        if(typeof updatePreview==='function'){ try{ updatePreview(); }catch(e){} }
+      }
+      showStat('✅ Guardado: ₲'+amount.toLocaleString()+' - '+payment+' - '+service+' → Neto ₲'+net.toLocaleString(), true);
       if(svcQuick){ svcQuick.classList.remove('show'); svcQuick.innerHTML=''; }
       setTimeout(function(){ if(statusEl) statusEl.style.display='none'; if(previewImg) previewImg.classList.remove('show'); }, 4000);
-    }, 300);
+    }catch(err){
+      showStat('❌ Error guardando: '+err.message, false);
+    }
   }
 
   function showServiceSelector(amount, payment, detectedService){
