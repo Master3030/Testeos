@@ -316,7 +316,7 @@ document.querySelectorAll('[data-close="trip-modal"]').forEach(b=>b.addEventList
 $('trip-modal').addEventListener('click',e=>{if(e.target===$('trip-modal'))closeTripModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTripModal()});
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s==='object'?{...defaults(),...s,commission:{...defaults().commission,...s.commission},bonus:{...defaults().bonus,...s.bonus}}:defaults()}catch{return defaults()}}
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){localStorage.setItem(KEY,JSON.stringify(state)); try{ window.__APP_STATE=state; }catch(e){} }
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
 function ask(title,message,callback){$('confirm-title').textContent=title;$('confirm-message').textContent=message;confirmCallback=callback;$('confirm-modal').classList.add('show')}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.close).classList.remove('show')));
@@ -514,7 +514,7 @@ $('export-btn').addEventListener('click',()=>{const blob=new Blob([JSON.stringif
 $('import-btn').addEventListener('click',()=>$('import-file').click());
 $('import-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.trips)||!Array.isArray(data.expenses))throw Error('Formato inválido');ask('Importar copia de seguridad','La importación reemplazará los datos actuales. Exporta primero una copia si quieres conservarlos.',()=>{state={...defaults(),...data,commission:{...defaults().commission,...data.commission},bonus:{...defaults().bonus,...data.bonus}};save();selectService(state.selectedService||'Bolt Auto');renderAll();renderSettings();toast('Copia importada correctamente')})}catch(err){toast('No se pudo importar: archivo no válido')}e.target.value=''});
 $('delete-all').addEventListener('click',()=>ask('Borrar todos los datos','Esta acción elimina viajes, gastos, metas y conteo guardados en este navegador. No se puede deshacer. Exporta una copia antes si la necesitas.',()=>{state=defaults();selectedService=state.selectedService;save();selectService(selectedService);renderAll();renderSettings();toast('Todos los datos fueron borrados')}));
-function renderAll(){renderTrips();renderExpenses();renderHero();renderBonus();renderSummary();updateCashTotal();renderSettings()}
+function renderAll(){renderTrips();renderExpenses();renderHero();renderBonus();renderSummary();updateCashTotal();renderSettings(); try{ window.__APP_STATE=state; }catch(e){} }
 $('trip-date').value=today();$('expense-date').value=today();renderCashFields();selectService(selectedService);renderAll();
 })();
 </script>
@@ -716,9 +716,26 @@ $('trip-date').value=today();$('expense-date').value=today();renderCashFields();
   var closeExec=document.getElementById('close-exec');
   function renderExec(){
     var trips=[];
-    try{ trips=(typeof state!=='undefined' && state.trips)?state.trips:[]; }catch(e){}
-    if(!trips.length){ try{ trips=JSON.parse(localStorage.getItem('trips')||'[]'); }catch(e){} }
-    if(!trips.length){ execContent.innerHTML='<p style="padding:12px">No hay viajes cargados. Tu balance de hoy es el que ves arriba.</p>'; return; }
+    try{
+      if(window.__APP_STATE && window.__APP_STATE.trips && window.__APP_STATE.trips.length){
+        trips=window.__APP_STATE.trips;
+      } else {
+        var raw=localStorage.getItem('ruta_finanzas_v1');
+        if(raw){ var parsed=JSON.parse(raw); if(parsed && parsed.trips) trips=parsed.trips; }
+      }
+    }catch(e){ console.log(e); }
+    if(!trips.length){
+      // Intentar leer del DOM como último recurso
+      try{
+        var rows=document.querySelectorAll('#report-trips-body tr');
+        if(rows.length && rows[0].querySelector('td')){
+          execContent.innerHTML='<p style="padding:12px">Tienes '+rows.length+' viajes en el reporte. Tu balance de hoy (arriba) es ₲'+document.querySelectorAll('.stat strong')[0]?.textContent+'</p>';
+          return;
+        }
+      }catch(e){}
+      execContent.innerHTML='<p style="padding:12px">No hay viajes cargados en memoria. Refrescá la página. Tu balance de hoy es el que ves arriba en las tarjetas (ej: Ingresos netos de hoy).</p>'; 
+      return;
+    }
     var totalNeto=0, porPago={}, porSvc={};
     trips.forEach(function(t){ totalNeto+=Number(t.net||0); porPago[t.payment]=(porPago[t.payment]||0)+1; porSvc[t.service]=(porSvc[t.service]||0)+1; });
     var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
